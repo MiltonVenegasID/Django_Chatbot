@@ -1,0 +1,31 @@
+@import 'mvp.css';
+
+.container { 
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background-image: url(/statics/img/IrisFondo.jpg);
+    z-index: -1;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+}
+
+#formRegister{
+    z-index: 100;   
+    width: 80%;
+    background-color: #fff;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+.form-container{
+    width: 80%;
+    display: grid;
+    place-items: center;
+}
+
+#titleRegister {
+    text-align: center;
+}

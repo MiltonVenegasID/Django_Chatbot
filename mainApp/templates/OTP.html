@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/sky.png' %}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de OTP</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/otp.css' %}">
+</head>
+<body>
+    <div id="OTPContainer">
+            <h2 class="TituloOTP">Verificación de OTP</h2>
+
+        {% if error_message %}
+        <p class="error">{{ error_message }}</p>
+        {% endif %}
+        <br>
+        <div class="otp-container">
+            <form method="POST">
+                <div class="message">
+                    <p>Para poder verificar su cuenta, hemos enviado un  código de verificación a su correo electrónico. por favor ingrese el código a continuación.</p>
+                </div>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Verificar OTP</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

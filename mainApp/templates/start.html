@@ -1,0 +1,284 @@
+{% load static %}
+<!DOCTYPE html>
+<html color-mode="user">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/init.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/sky.png' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
+        integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/base-min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <title>Login</title>
+</head>
+
+<body>
+
+
+    <div class="header">
+        <div class="pure-g">
+            <div class="pure-u-1-5 item" id="ItemHeader"><a href="#" class="btn btn-head">C.I.K 9</a></div>
+            <div class="pure-u-1-5 item" id="ItemHeader"><a href="#" class="btn btn-head">ATENEA</a></div>
+            <div class="pure-u-1-5 item" id="ItemHeader"><a href="https://atlantida2.mx"
+                    class="btn btn-head">ATLANTIDA</a></div>
+            <div class="pure-u-1-5 item" id="ItemHeader"><a href="#" class="btn btn-head">CENTINELA</a></div>
+            <div class="pure-u-1-5 item" id="ItemHeader"><a href="https://www.grupocardinales.com/hermes/index"
+                    class="btn btn-head">HERMES</a></div>
+        </div>
+
+    </div>
+
+    <div class="splash-container">
+        <div class="splash">
+            <h2 class="InicioSesionTitulo">Login</h2>
+            {% if not request.user.is_authenticated %}
+            <div class="method">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="NEO">
+                        <button type="submit" class="ButtonLog">Login</button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="logout">
+                <P>Ya has iniciado sesion, te gustaria cerrarla?</P>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+            {% endif %}
+            <div class="pure-u-1" id="MoreInfoDiv">
+                <div class="separadorMas">
+                    <p>Mas acerca de nosotros</p>
+                </div>
+                <img src="{% static 'img/down.png' %}" alt="">
+            </div>
+
+
+        </div>
+    </div>
+    <div class="divider div-transparent div-arrow-down" style="z-index: 10;"></div>
+
+    <div class="NormalContent">
+        <div>
+            <div class="ribbon l-box-lrg pure-g" id="ContentStyle1">
+                <div class="l-box-lrg is-center pure-u-1 pure-u-md-1-2 pure-u-lg-1-5 restructure" data-aos="zoom-in"
+                    id="AdjustItems">
+                    <div id="ImageBorder">
+                        <img width="200" alt="File Icons" class="pure-img-responsive" id="AIImage"
+                            src="{% static 'img/image.png' %}">
+                    </div>
+                </div>
+                <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-4-5" data-aos="zoom-in-left" id="AdjustItems">
+                    <div class="BorderCard">
+                        <div class="IconHeader">
+                            <i class="large material-icons">memory</i>
+                            <h2>¿Que es Iris?</h2>
+
+                        </div>
+
+                        <p id="informacion">
+                            Iris, es un Chatbot que funciona mediante adaptadores logicos, metodos de entrenamiento por
+                            uso
+                            de
+                            datos almacenados y aprendizaje en base a fundamentos y algoritmos de categorizacion de
+                            datos,
+                            su
+                            funcion es la de contribuir a la generacion y ejecucion de procesos que el usuario solicite,
+                            ademas
+                            de
+                            resolver cualquiera de las dudas que el usuario pueda tener incluso si no tiene relacion con
+                            procesos de
+                            la empresa
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="divider div-transparent div-arrow-down"></div>
+
+
+        <div class="AdjustItems" id="Re-Org">
+
+            <div class="information pure-g" id="ContentStyle2">
+                <div class="HeaderTwo">
+                    <p id="TituloBeneficios">¿Por que elegir a Iris?</p>
+                </div>
+                <div class="FourDivider" data-aos="fade-left">
+                    <div class="pure-u-1 pure-u-md-1-2 GridFour" id="AdjustUp">
+
+                        <div class="l-box">
+                            <div class="IconHeader">
+                                <i class="large material-icons">all_inclusive</i>
+                                <h3 class="information-head"> La union de todo </h3>
+                            </div>
+
+
+                            <p class="BeneficiosText">
+                                Iris logra mediante el uso de diferentes servicios, conectar toda la informacion acerca
+                                del
+                                usuario
+                                y los productos dentro de cada sitio web de la empresa, por lo tanto puedes acceder a
+                                estos
+                                datos
+                                dentro de iris sin la necesidad de realizar ni un solo click.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="FourDivider" data-aos="fade-right">
+                    <div class="pure-u-1 pure-u-md-1-2 GridFour" id="AdjustUp">
+                        <div class="l-box">
+                            <div class="IconHeader">
+                                <i class="large material-icons">card_membership</i>
+                                <h3 class="information-head"> Diferentes metodos de pago </h3>
+                            </div>
+                            <p class="BeneficiosText">
+                                Existen diferentes metodos de pago que se acomodan a las diferentes necesidades de los
+                                usuarios,
+                                con
+                                una gran variedad de funciones de gestion y programacion de actividades para automatizar
+                                las
+                                tareas
+                                y ahorrar la mayor cantidad de tiempo al usuario.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="FourDivider" id="BottomBenefits" data-aos="fade-left">
+
+                    <div class="pure-u-1 pure-u-md-1-2 GridFour" id="AdjustUp">
+                        <div class="l-box">
+                            <div class="IconHeader">
+                                <i class="large material-icons">insert_chart</i>
+                                <h3 class="information-head"> Informacion de todo tipo </h3>
+                            </div>
+                            <p class="BeneficiosText">
+                                Puedes preguntarle a Iris acerca de diferentes datos que no esten relacionados con la
+                                empresa o
+                                afin
+                                a ella, ademas de poder tener una conversacion fluida y natural, ¡Prueba a hacerle
+                                preguntas!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="FourDivider" id="BottomBenefits" data-aos="fade-right">
+                    <div class="pure-u-1 pure-u-md-1-2 GridFour" id="AdjustUp">
+                        <div class="l-box">
+                            <div class="IconHeader">
+                                <i class="large material-icons">assignment_turned_in</i>
+                                <h3 class="information-head"> Administra actividades </h3>
+                            </div>
+                            <p class="BeneficiosText">
+                                Iris puede realizar diferentes procesos y actividades para el usuario, como la
+                                peticion
+                                de
+                                cuentas
+                                espejo, la gestion de inventario y la estructuracion de los datos mediante
+                                diferentes
+                                tipos
+                                de
+                                formatos como lo pueden ser excel y pdf.
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="divider div-transparent div-arrow-down"></div>
+
+        <div class="pricing-tables pure-g" id="ContentStyle3">
+            <div class="pure-u-1 pure-u-md-1-4" data-aos="fade-down" data-aos-easing="linear" data-aos-duration="1000"
+                id="PriceItems">
+                <div class="pricing-table pricing-table-free">
+                    <div class="pricing-table-header" id="TablaPrecios1">
+                        <h2>Personal</h2>
+
+                        <span class="pricing-table-price">
+                            $5 <span>per month</span>
+                        </span>
+                    </div>
+
+                    <div class="points">
+                        <i class="tiny material-icons">navigate_next</i>
+                        <p>Use your own domain</p>
+                    </div>
+
+                    <button class="button-choose pure-button" id="BotonesPrecio">Adquirir</button>
+                </div>
+            </div>
+
+            <div class="pure-u-1 pure-u-md-1-4" data-aos="fade-down" data-aos-easing="linear" data-aos-duration="1500"
+                id="PriceItems">
+                <div class="pricing-table pricing-table-biz pricing-table-selected">
+                    <div class="pricing-table-header" id="TablaPrecios2">
+                        <h2>Small Business</h2>
+
+                        <span class="pricing-table-price">
+                            $25 <span>per month</span>
+                        </span>
+                    </div>
+
+                    <div class="points">
+                        <i class="tiny material-icons">navigate_next</i>
+                        <p>Use your own domain</p>
+                    </div>
+                    <button class="button-choose pure-button" id="BotonesPrecio">Adquirir</button>
+                </div>
+            </div>
+
+            <div class="pure-u-1 pure-u-md-1-4" data-aos="fade-down" data-aos-easing="linear" data-aos-duration="2000"
+                id="PriceItems">
+                <div class="pricing-table pricing-table-enterprise">
+                    <div class="pricing-table-header" id="TablaPrecios3">
+                        <h2>Enterprise</h2>
+
+                        <span class="pricing-table-price">
+                            $45 <span>per month</span>
+                        </span>
+                    </div>
+                    <div class="points">
+                        <i class="tiny material-icons">navigate_next</i>
+                        <p>Use your own domain</p>
+                    </div>
+
+                    <button class="button-choose pure-button" id="BotonesPrecio">Adquirir</button>
+                </div>
+            </div>
+        </div>
+        <div class="divider div-transparent div-arrow-down"></div>
+
+        <div class="footer l-box is-center" id="FooterPrincipal">
+            <div class="pure-u-1-1 pure-u-md-1-6" id="footerText"><span>Contactanos</span>
+                <ul>
+                    <li>333 3333 3333</li>
+                    <li>Ejemplo@gmail.com</li>
+                </ul>
+            </div>
+            <div class="pure-u-1-1 pure-u-md-1-6" id="footerText"><span>Otros servicios</span>
+                <ul>
+                    <li>grupocardinales.mx</li>
+                    <li>google.com.mx</li>
+                    <li>ok.yahoo.com</li>
+                </ul>
+            </div>
+            <div class="pure-u-1-1 pure-u-md-14-24" id="footerText"> <span>Para todos los asociados</span>
+                <p>Bird, Steven, Edward Loper and Ewan Klein (2009), Natural Language Processing with Python. O’Reilly
+                    Media Inc.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/Init.js' %}" async></script>
+</body>
+
+</html>

@@ -1,0 +1,567 @@
+@import url("mvp.css");
+
+.header {
+    background-color: #000;
+    z-index: 9999;
+    display: grid;
+    opacity: 1;
+    top: 0;
+    position: sticky;
+    margin: 0%;
+    padding: 2%;
+}
+
+
+#ItemHeader {
+    text-align: center;
+    list-style: none;
+}
+
+.btn-head {
+    text-decoration: none;
+    color: #fff;
+    letter-spacing: 0;
+}
+
+.btn-head:hover,
+.btn-head:active {
+    letter-spacing: 5px;
+}
+
+.btn-head:after,
+.btn-head:before {
+    backface-visibility: hidden;
+    border: 1px solid #fff;
+    bottom: 0px;
+    content: "";
+    display: block;
+    margin: 0 auto;
+    position: relative;
+    transition: all 280ms ease-in-out;
+    width: 0;
+}
+
+.btn-head:hover:after,
+.btn-head:hover:before {
+    backface-visibility: hidden;
+    border-color: #fff;
+    transition: width 350ms ease-in-out;
+    width: 90%;
+}
+
+.btn-head:hover:before {
+    bottom: auto;
+    top: 0;
+    width: 90%;
+}
+
+.splash-container {
+    color: #fff;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+    left: 0;
+    background-image: url('/statics/img/MainBack.jpg');
+    width: 100%;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin: auto;
+    position: relative;
+}
+
+.splash {
+    width: 100%;
+    height: 2%;
+    margin: auto;
+    position: relative;
+    left: 0;
+    text-align: center;
+}
+
+.InicioSesionTitulo {
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.method {
+    display: grid;
+    justify-content: center;
+    width: 600px;
+    margin: auto;
+}
+
+.ButtonLog {
+    display: grid;
+    place-items: center;
+    padding: 10px;
+    width: 25%;
+}
+
+#BotonInicio {
+    align-items: center;
+    border: 3px solid #0e0a0a;
+    /* Border color and thickness */
+    border-radius: 8px;
+    box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+    box-sizing: border-box;
+    display: flex;
+    font-family: Phantomsans, sans-serif;
+    font-size: 20px;
+    justify-content: center;
+    line-height: 1em;
+    max-width: 100%;
+    min-width: 140px;
+    padding: 20px;
+    user-select: none;
+    margin-bottom: 25%;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.pure-img-responsive {
+    width: 200px;
+}
+
+#BotonInicio:active,
+#BotonInicio:hover {
+    outline: 0;
+}
+
+#BotonInicio span {
+    background-color: #070000;
+    ;
+    padding: 16px 24px;
+    border-radius: 6px;
+    width: 100%;
+    height: 100%;
+    transition: 300ms;
+}
+
+#BotonInicio:hover span {
+    background: none;
+}
+
+#MasInfo {
+    color: #fff;
+    margin-top: 1%;
+    display: grid;
+    place-items: center;
+}
+
+.pure-u-1.pure-u-md-1-2.GridFour {
+    width: 75%;
+    height: 35vh;
+    margin: 0;
+}
+
+.pure-u-1.pure-u-md-1-2 {
+    display: grid;
+    justify-content: center;
+}
+
+.pure-u-1.pure-u-md-1-4 {
+    margin-left: 4%;
+    margin-right: 4%;
+}
+
+
+.separadorMas {
+    justify-content: center;
+    font-size: 24px;
+    font-family: ARK;
+    margin: auto;
+    width: 70%;
+}
+
+.divider {
+    position: relative;
+    padding: 0;
+    height: 1px;
+}
+
+.div-transparent:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 5%;
+    right: 5%;
+    width: 90%;
+    height: 1px;
+    background-image: linear-gradient(to right, transparent, rgb(207, 210, 218), transparent);
+}
+
+.div-arrow-down:after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -7px;
+    left: calc(50% - 7px);
+    width: 14px;
+    height: 14px;
+    transform: rotate(45deg);
+    background-color: white;
+    border-bottom: 1px solid rgb(216, 220, 230);
+    border-right: 1px solid rgb(207, 210, 218);
+}
+
+.NormalContent {
+    display: inline;
+    position: relative;
+
+    width: 100%;
+    min-height: 12%;
+    z-index: 2;
+}
+
+#AdjustItems {
+    height: 400px;
+    margin-top: 10%;
+    margin-bottom: 10%;
+}
+
+#ContentStyle1 {
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    color: #fff;
+    background-image: url(/statics/img/FondoStatic2.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#ContentStyle2 {
+    place-content: center;
+    background: center;
+    background-image: url(/statics/img/FondoStatic1.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#ContentStyle3 {
+    height: 100%;
+    background-image: url(/statics/img/LastBack.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#ImageBorder {
+    margin-top: 5%;
+    width: 100%;
+    padding-left: 12%;
+    height: 80%;
+    padding-right: 12%;
+}
+
+.BorderCard {
+    margin-top: 1%;
+    color: #000;
+    background: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(45px);
+    -webkit-backdrop-filter: blur(3.1px);
+    border-right: 1px solid rgba(255, 255, 255, 0.37);
+    width: 85%;
+    height: 50%;
+    padding: 5%;
+    border: 1px solid black;
+}
+
+.IconHeader {
+    display: flex;
+    align-items: center;
+}
+
+.IconHeader i {
+    font-size: 50px;
+    margin-right: 10px;
+}
+
+.points {
+    display: flex;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
+.points i {
+    display: grid;
+    place-content: center;
+}
+
+#informacion {
+    text-align: justify;
+}
+
+#Re-Org {
+    display: grid;
+}
+
+.information.pure-g {
+    color: #fff;
+    margin: auto;
+}
+
+.FourDivider {
+
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: grid;
+    place-items: center;
+    width: 40%;
+    margin: 2%;
+    height: 100%;
+}
+
+.HeaderTwo {
+    display: contents;
+    font-family: LoganFive;
+}
+
+#TituloBeneficios {
+    margin-top: 5%;
+    margin-bottom: 5%;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+}
+
+.pricing-table-price {
+    font-size: 35px;
+}
+
+
+.BeneficiosText {
+    max-width: 600px;
+    text-align: justify;
+}
+
+#FooterPrincipal {
+    padding-top: 2%;
+    background-color: rgb(0, 0, 0);
+}
+
+#footerText {
+    color: #fff;
+    margin-left: 1.2%;
+    margin-right: 1.2%;
+}
+
+#PriceItems {
+    height: 300px;
+    margin-top: 5%;
+    margin-bottom: 10%;
+    display: grid;
+    place-items: center;
+
+}
+
+#AdjustUp {
+
+    margin-top: 10%;
+}
+
+#BottomBenefits {
+    margin-bottom: 5%;
+}
+
+#AIImage {
+    margin-top: 30%;
+}
+
+.adjusterDiv {
+    padding: 0;
+    width: 100%;
+}
+
+.pricing-table {
+    background: rgba(255, 255, 255, 0.24);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    overflow: hidden;
+    border-radius: 1.5rem;
+
+
+    ol {
+        margin: 0;
+        gap: 1rem;
+        padding: 0;
+        display: flex;
+        list-style: none;
+        place-items: center;
+        flex-direction: column;
+        counter-reset: my-counter;
+
+        li {
+            width: 40rem;
+            text-align: center;
+            border-radius: 3rem;
+            background: rgba(255, 255, 255, 0.5);
+            counter-increment: my-counter;
+            padding: 1.1rem 1.5rem 1.1rem 1.5rem;
+
+            &::before {
+                content: counter(my-counter) ". ";
+            }
+        }
+    }
+}
+
+#usuariosClass {
+    font-family: NoteSans;
+    height: 20%;
+    width: 90%;
+}
+
+#TablaPrecios1 {
+    background-color: #88d1f0;
+    text-align: center;
+}
+
+#TablaPrecios2 {
+    background-color: rgb(38, 189, 38);
+    text-align: center;
+}
+
+#TablaPrecios3 {
+    background-color: blue;
+    text-align: center;
+}
+
+#BotonesPrecio {
+    display: grid;
+    place-items: center;
+    padding: 3%;
+    margin: auto;
+    margin-bottom: 5%;
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    
+    .points p{
+        font-size: 12px;
+
+    }
+
+    .btn-head:hover,
+    .btn-head:active {
+        letter-spacing: 2px;
+    }
+
+    #ItemHeader {
+        font-size: 8px;
+    }
+
+    .btn .btn-head {
+        font-size: 10px;
+    }
+
+    .header {
+        font-size: 10px
+    }
+
+    .method {
+        width: fit-content;
+    }
+
+    .pure-img-responsive {
+        width: 150px;
+    }
+
+    .BorderCard {
+        width: fit-content;
+        height: 90%;
+        margin-top: -40%;
+    }
+
+    #Re-Org {
+        font-size: 10px;
+    }
+
+    #PriceItems {
+        margin: 0;
+        height: 48%;
+        width: 33.3%;
+        
+    }
+
+    #AdjustItems {
+        margin: 0;
+    }
+
+    .pricing-table-header h2 {
+        font-size: 15px;
+    }
+
+    .pricing-table {
+        height: 90%;
+        width:85%;
+
+    }
+
+    .pricing-table-price {
+        font-size: 15px;
+    }
+
+    .pricing-table-list {
+        font-size: 12px;
+    }
+
+    .pricing-table-list li {
+        margin: 0;
+        padding: 0;
+
+    }
+}
+
+@media (min-width: 601px) and (max-width: 800px) {
+    .BorderCard {
+        height: 90%;
+    }
+
+    .points p {
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 650px) and (max-width: 1000px) {
+    .pricing-table-header h2 {
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .points p {
+        font-size: 16px;
+    }
+
+    .pricing-table-price {
+        font-size: 20px;
+    }
+
+    .pricing-table-list {
+        width: 200px;
+    }
+
+    #footerText {
+        font-size: 10px;
+        margin: 0;
+    }
+
+}
+
+@media (min-width: 1000px){
+    .points p {
+        font-size: 25px;
+    }
+}

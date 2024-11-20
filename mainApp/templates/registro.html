@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Registrar usuario</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/register.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/sky.png' %}" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="form-container">
+            <form method="post" id="formRegister">
+                <h2 id="titleRegister">Registrar Usuario</h2>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Registrar</button>
+        </form>
+    </div>
+</body>
+
+</html>

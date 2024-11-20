@@ -1,0 +1,73 @@
+@import url("mvp.css");
+
+.entrada{
+    font-size: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
+    color: #FFFFFF;
+}
+
+#iris1{
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFFFFF;
+}
+
+.btn-primary{
+    font-size: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.otp-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#OTPContainer{
+    top: 0;
+    position: relative;
+}
+
+
+.TituloOTP{
+    display: flex;
+    justify-content: center;
+    font-size: 30px;
+    font-family: League;
+
+}
+
+.message{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-right: 2%;
+    margin-left: 2%;
+}
+
+.btn .btn-primary{
+    font-size: 13px;
+    display: flex;
+    height: 10%;
+    justify-content: center;
+    align-items: center;
+}
+
+@media only screen and (min-width: 700) and (max-width: 1300) {
+    .message{
+        font-size: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+}
