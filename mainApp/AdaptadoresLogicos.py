@@ -50,7 +50,7 @@ class InformacionUsuario(LogicAdapter):
         self.request = request
 
     def can_process(self, statement):
-        words = ['soy', 'mi usuario', 'mis datos', 'mi datos']
+        words = ['soy', 'mi usuario', 'mis datos', 'mi datos', 'informacion acerca de mi cuenta']
         return  any(word in statement.text.lower() for word in words)
 
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
@@ -79,7 +79,7 @@ class CuentaEspejo(LogicAdapter):
         self.request = request
 
     def can_process(self, statement):
-        words = ['realizar cuenta espejo', 'hacer cuenta espejo', 'solicito cuenta espejo', 'quiero cuenta espejo', 'necesito una cuenta espejo', 'ocupo una cuenta espejo']
+        words = ['realizar cuenta espejo', 'hacer cuenta espejo', 'solicito cuenta espejo', 'quiero cuenta espejo', 'necesito una cuenta espejo', 'ocupo una cuenta espejo', 'solicitud de cuentas espejo']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters = None,  **kwargs):
@@ -250,7 +250,7 @@ class uh(LogicAdapter):
         self.request = request
         
     def can_process(self, statement):
-        words = ['mis equipos', 'dame informacion de mis equipos', 'mis equipos en la empresa']
+        words = ['mis equipos', 'dame informacion de mis equipos', 'mis equipos en la empresa', 'revisar equipos']
         return any(word in statement.text.lower() for word in words)
 
     def process(self, input_statement, additional_response_selection_parameters=None):

@@ -187,7 +187,7 @@ def get_bot_response(request):
         if not user_input or not isinstance(user_input, str):
             return JsonResponse({'response': 'Entrada inválida'}, status=400)
             
-        preprocessed_input = user_input
+        preprocessed_input = user_input.lower()
 
         if len(preprocessed_input) > 100:
             return JsonResponse({'response': 'Por favor, intenta ser más específico'}, status=400)
