@@ -26,26 +26,17 @@ class FallBack(LogicAdapter):
 
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
         arr = np.array(['Solicitud de cuentas espejo', 'Revisar Equipos', 'Informacion acerca de mi cuenta'])
-        rand_1 = np.random.choice(arr, size=1)
-        rand_2 = np.random.choice(arr, size=1)
-        rand_3 = np.random.choice(arr, size=1)
+        selected_options = np.random.choice(arr, size=3, replace=False)  
         
-        while rand_2 == rand_1 or rand_2 == rand_3:
-            rand_2 = np.random.choice(arr, size=1)
-            
-        while rand_3 == rand_1 or rand_3 == rand_2:
-            rand_3 = np.random.choice(arr, size=1)
-            
-            
         response = f"""
-            Lo lamento, no pude entender tu solicitud, alguno de estas opciones va mas de acuerdo a lo que necesitas?
+            Lo lamento, no pude entender tu solicitud, ¿alguno de estas opciones va más de acuerdo a lo que necesitas?
             <br>
             <div class="Structure">
-            <button id="SelectAdapter">{rand_1}</button>
-            <br>
-            <button id="SelectAdapter">{rand_2}</button>
-            <br>
-            <button id="SelectAdapter">{rand_3}</button>
+                <button class="select-adapter" data-value="{selected_options[0]}">{selected_options[0]}</button>
+                <br>
+                <button class="select-adapter" data-value="{selected_options[1]}">{selected_options[1]}</button>
+                <br>
+                <button class="select-adapter" data-value="{selected_options[2]}">{selected_options[2]}</button>
             </div>
         """
         response_statement = Statement(text=response)
