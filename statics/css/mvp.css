@@ -692,8 +692,16 @@ blockquote footer {
     border-start-start-radius: 4px;
     margin-bottom: 5px;
 }
+#System{
+    background-color: rgb(255, 0, 0);
+    float: left;
+    clear: left;
+    text-align: left;
+    border-start-start-radius: 4px;
+    margin-bottom: 5px;
+}
 
-#user,
+#user, #System,
 #Bot {
     width: fit-content;
     display: inline-block;

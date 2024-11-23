@@ -66,6 +66,7 @@ class CustomChatBot(ChatBot):
             response = fallback_response
         
         return response
+    
 
 def Chat_GPT(user_text):
 
@@ -100,7 +101,8 @@ chatbot = CustomChatBot('IRIS',
     {'import_path': 'mainApp.AdaptadoresLogicos.locations'},
     {'import_path': 'mainApp.AdaptadoresLogicos.apikeyConjunt'},
     {'import_path': 'mainApp.AdaptadoresLogicos.CuentaEspejo'},
-    {'import_path': 'mainApp.AdaptadoresLogicos.UniqueUser'}
+    {'import_path': 'mainApp.AdaptadoresLogicos.UniqueUser'},
+    {'import_path': 'mainApp.AdaptadoresLogicos.FallBack'}
 ]  
 )
 
@@ -255,6 +257,7 @@ def send_otp(self, request):
         connection= connection
 
         )
+        print(f'{otp}')
         return True  
 
         

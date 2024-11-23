@@ -11,3 +11,13 @@
 .header-element{
     right: 0;
 }
+.Structure{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+#SelectAdapter{
+    width: 60%;
+}
+

@@ -95,6 +95,8 @@
             .catch(error => console.error('Error:', error));
     }
 
+    
+
     function EnviarImei() {
     var selected = [];
     var checkboxes = document.getElementsByName('selected_devices');
@@ -160,7 +162,7 @@
 
         } catch (error) {
             console.error('Error:', error);
-            chatLog.innerHTML += `<div class="logs error">Error: No se puede emitir una respuesta, por favor reporte la falla</div>`;
+            chatLog.innerHTML += `<div id="System">System: No tienes permisos para realizar esta accion</div>`;
         } finally {
             loader.style.display = 'none';
         }

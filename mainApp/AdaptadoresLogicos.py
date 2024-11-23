@@ -13,9 +13,44 @@ from datetime import datetime
 import hashlib
 import openai
 from django.conf import settings
+import numpy as np
 
 
+class FallBack(LogicAdapter):
+    def __init__(self,chatbot, **kwargs):
+        super().__init__(chatbot, **kwargs)
         
+    def can_process(self, statement):
+        words = ['codigoamarillo', '350']
+        return any(word in statement.text.lower() for word in words)
+
+    def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
+        arr = np.array(['Solicitud de cuentas espejo', 'Revisar Equipos', 'Informacion acerca de mi cuenta'])
+        rand_1 = np.random.choice(arr, size=1)
+        rand_2 = np.random.choice(arr, size=1)
+        rand_3 = np.random.choice(arr, size=1)
+        
+        while rand_2 == rand_1 or rand_2 == rand_3:
+            rand_2 = np.random.choice(arr, size=1)
+            
+        while rand_3 == rand_1 or rand_3 == rand_2:
+            rand_3 = np.random.choice(arr, size=1)
+            
+            
+        response = f"""
+            Lo lamento, no pude entender tu solicitud, alguno de estas opciones va mas de acuerdo a lo que necesitas?
+            <br>
+            <div class="Structure">
+            <button id="SelectAdapter">{rand_1}</button>
+            <br>
+            <button id="SelectAdapter">{rand_2}</button>
+            <br>
+            <button id="SelectAdapter">{rand_3}</button>
+            </div>
+        """
+        response_statement = Statement(text=response)
+        response_statement.confidence = 1
+        return response_statement
 class InformacionUsuario(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
@@ -53,7 +88,7 @@ class CuentaEspejo(LogicAdapter):
         self.request = request
 
     def can_process(self, statement):
-        words = ['codigoverde', '120']
+        words = ['realizar cuenta espejo', 'hacer cuenta espejo', 'solicito cuenta espejo', 'quiero cuenta espejo', 'necesito una cuenta espejo', 'ocupo una cuenta espejo']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters = None,  **kwargs):
@@ -69,6 +104,11 @@ class CuentaEspejo(LogicAdapter):
             index_object = next((i for i, item in enumerate(object_data_api)
                         if item.get('username') == user.username and 
                            item.get('email') ==  user.email))
+        else:
+            html_Conj = "No se encontraron datos de tu cuenta"
+            response_statement = Statement(text = html_Conj)
+            response_statement.confidence = 1
+            return response_statement
             
         if index_object != 1:
             objects_user = object_data_api[index_object]
@@ -162,7 +202,7 @@ class GetApi(LogicAdapter):
         self.request = request
 
     def can_process(self, statement):
-        words = ['Consume la api', 'api',  'consumo de api']
+        words = ['necesito informacion de mi cuenta', 'informacion de usuario', 'mi usuario', 'mis datos']
         return any(word in statement.text.lower() for word in words) 
 
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
@@ -219,7 +259,8 @@ class uh(LogicAdapter):
         self.request = request
         
     def can_process(self, statement):
-        return '190' in statement.text.lower() or 'mis equipos' in statement.text.lower() or 'mi equipos' in statement.text.lower()
+        words = ['mis equipos', 'dame informacion de mis equipos', 'mis equipos en la empresa']
+        return any(word in statement.text.lower() for word in words)
 
     def process(self, input_statement, additional_response_selection_parameters=None):
         if self.request and self.request.user.is_authenticated:
@@ -290,39 +331,27 @@ class ClimaApi(LogicAdapter):
         response_statement.confidence = 1.0
         
         return response_statement
-    
 class AyudaBase(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
         self.button_responses = {'Cuentas Espejo': 'Te mostrare algunas respuestas de cuentas espejo', 'boton 2': 'Ayuda en procesos', 'boton 3': 'Elaboracion de reportes'}
     
     def can_process(self, statement):
-        return 'ayuda' in statement.text.lower() or 'soporte' in statement.text.lower() or 'soporte tecnico' in statement.text.lower()
+        words = ['ayuda', 'ayudame', 'ayuda con', 'ayuda a']
+        return any(word in statement.text.lower() for word in words)
     
-    def process(self, input_statement, additional_response_selection_parameters):
-        response_text = "¿En qué puedo ayudarte?"
-        response_statement = Statement(text=response_text)
-        response_statement.confidence = 1
-
-        buttons = [
-            {'title': 'Opción 1', 'payload': 'Cuentas Espejo'},
-            {'title': 'Opción 2', 'payload': 'Ayuda en procesos'},
-            {'title': 'Opción 3', 'payload': 'Elaboracion de reportes'},
-        ]
-
-        buttons_text = "\n".join([f"{button['title']} ({button['payload']})" for button in buttons])
-        response_statement = Statement(text=response_text + "\n" + buttons_text)
-        response_statement.confidence = 1
-
-
-        for payload, response in self.button_responses.items():
-            if payload.lower() in input_statement.text.lower():
-                response_statement.text = response
-                break
-
-        return response_statement
-    
-    
+    def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):
+        Options = ['Informacion de la cuenta', 'Solicitud de productos', 'Solicitud de servicios']
+        df = pd.DataFrame(Options)
+        list_html = df.to_html(index=False, header=False, table_id='options')
+        response_text = f"""
+        Parece que necesitas ayuda con un tema en especifico . Aqui tienes algunas opciones:
+        <br>
+        <button>Hola</button>
+        """
+        response = Statement(text= response_text)
+        response.confidence = 1
+        return response
 #Lenguaje natural
 
 class apikeyConjunt(LogicAdapter):
