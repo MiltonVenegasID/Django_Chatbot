@@ -79,7 +79,7 @@ class CuentaEspejo(LogicAdapter):
         self.request = request
 
     def can_process(self, statement):
-        words = ['realizar cuenta espejo', 'hacer cuenta espejo', 'solicito cuenta espejo', 'quiero cuenta espejo', 'necesito una cuenta espejo', 'ocupo una cuenta espejo', 'solicitud de cuentas espejo']
+        words = ['realizar cuenta espejo', 'realizar una cuenta espejo', 'hacer cuenta espejo', 'solicito cuenta espejo', 'quiero cuenta espejo', 'necesito una cuenta espejo', 'ocupo una cuenta espejo', 'solicitud de cuentas espejo']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters = None,  **kwargs):
@@ -138,27 +138,24 @@ class CuentaEspejo(LogicAdapter):
         '''
         table_html = '<div style="max-height: 400px; overflow-y: auto;">'
         table_html += '<table class="table table_string">'
-        table_html += '<thead><tr><th>Seleccionar</th><th>Nombre</th><th>IMEI</th></tr></thead>'
+        table_html += '<thead><th>Nombre</th><th>IMEI</th></tr></thead>'
         table_html += '<tbody>'
         
         devices_json = []
         for index, (name, imei) in enumerate(zip(nameFromImei, Imei)):
             device_data = {
-                'index': index,
-                'name': name,
-                'imei': imei,
-                'selected': False
+                'imei': imei
             }
             devices_json.append(device_data)
             
             table_html += '<tr>'
-            table_html += f'<td><input type="checkbox" name="device_{index}" onchange="updateDeviceSelection({index})"></td>'
-            table_html += f'<td>{name}<input type="hidden" id="device_name_{index}" value="{name}"></td>'
-            table_html += f'<td>{imei}<input type="hidden" id="device_imei_{index}" value="{imei}"></td>'
+            table_html += f'<td>{imei}<input type="checkbox" id="device_imei_{index}" value="{imei}"/></td>'
+            table_html += f'<td>{name}<p id="device_name_{index}" value="{name}"></td>'
             table_html += '</tr>'
         table_html += '</tbody></table></div>'
         
         table_html += f'<input type="hidden" id="devices_data" name="devices_data" value=\'{json.dumps(devices_json)}\'>'
+        print(devices_json)
         
         html_Conj += table_html
             
@@ -724,3 +721,14 @@ class UniqueUser(LogicAdapter):
         response_statement.confidence = 1
         
         return response_statement
+    
+    class Reglamento(LogicAdapter):
+        def __init__(self, chatbot, **kwargs):
+            super().__init__(chatbot, **kwargs)
+                
+        def can_process(self, statement):
+            words = ['reglamento', 'reglas']
+            return any(word in statement.text.lower() for word in words)
+        
+        def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
+            response = "Parece que necesitas informacion acerca de las reglas internas"

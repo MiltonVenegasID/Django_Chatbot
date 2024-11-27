@@ -40,7 +40,7 @@
                 <span class="btn-group">
                     <button class="fake-button" onclick="sendMessage()" id="btn"><i
                             class="large material-icons">send</i></button>
-                    <button class="fake-button" onclick="borrarIris()"><i
+                    <button class="fake-button"><i
                             class="large material-icons">warning</i></button>
                 </span>
             </div>
@@ -61,6 +61,48 @@
 </body>
 
 <script>
+
+    let audioRec = {audio: true};
+    navigator.mediaDevices.getUserMedia(audioRec)
+
+    .then(function(mediaStreamObj){
+        let audio = document.querySelector('Audio');
+        if("srcObject" in audio){
+            audio.srcObject = mediaStreamObj;
+        }
+        else{
+            audio.srcObject = window.URL
+            .createObjectURL(mediaStreamObj);
+        }
+
+        audio.onloadedmetadata = function (ev){
+            audio.play();
+        };
+        
+        let start = document.getElementById('btnAudio');
+        let mediaRecorder = new MediaRecorder(mediaStreamObj);
+        start.addEventListener('mousedown', function(ev) {
+            mediaRecorder.start();
+        })
+        start.addEventListener('mouseUp', function(ev){
+            mediaRecorder.stop();
+        })
+        mediaRecorder.ondataavailable = function(ev){
+            dataArray.push(ev.data);
+        }
+        let dataArray = [];
+
+        mediaRecorder.onstop = function(ev){
+            let audioData = new Blob(dataArray,
+                {'type': 'audio/mp3;'}
+            );
+            dataArray = [];
+
+            let audioSrc = window.URL
+            .createObjectURL(audioData);
+            playAudio.src = audioSrc;
+        }
+    })
 
     document.querySelector('video').playbackRate = 0.80;
     document.addEventListener('DOMContentLoaded', function () {
@@ -96,6 +138,7 @@
             .catch(error => console.error('Error:', error));
     }
 
+    
     function borrarIris() {
         fetch('borrarIris', {
             method: 'GET',
@@ -106,8 +149,6 @@
             })
             .catch(error => console.error('Error:', error));
     }
-
-
 
     function EnviarImei() {
         var selected = [];

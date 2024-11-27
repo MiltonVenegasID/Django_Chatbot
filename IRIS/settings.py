@@ -14,6 +14,7 @@ from pathlib import Path
 import pymysql
 import os
 from . import config
+from datetime import datetime, timedelta
 
 pymysql.install_as_MySQLdb()
 
@@ -68,6 +69,7 @@ INSTALLED_APPS = [
     'chatterbot.ext.django_chatterbot',
     'mainApp',
     'rest_framework',
+    'rest_framework_simplejwt',
     'IRIS',
 ]
 
@@ -120,6 +122,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'IRIS.wsgi.application'
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

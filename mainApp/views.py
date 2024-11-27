@@ -119,22 +119,27 @@ trainer.train('chatterbot.corpus.custom')
 class TextToSpeech:
     def __init__(self):
         self.engine = pyttsx3.init()
+        self.loop_running = False
         self.engine.setProperty('rate', self.engine.getProperty('rate') * 0.8)
         self.engine.setProperty('volume', 1.0)
 
     def speak(self, text):
-        if not self.engine.isBusy():
+        if not self.loop_running:
+            self.loop_running = True
             self.engine.say(str(text))
             self.engine.runAndWait()
+        else:
+            raise RuntimeError("El loop ya ha comenzado")
             
     def speak_in_thread(self, text):
-        thread = threading.Thread(target=self.speak, args=(text,))
+        thread = threading.Thread(target=self.speak, args=(text))
+        self.loop_running = False
+        self.engine.stop()
         thread.start()
         #TODO:
         #FIXME:
 
 tts = TextToSpeech()
-
     
 def fetch_wikipedia_summary(query):
     try:
@@ -343,7 +348,7 @@ class Iris(LoginRequiredMixin, View):
             return PermissionDenied()
         
 def send_to_api(apiReturn, data):
-    send_to_api = requests.post(apiReturn, data=data)
+    #send_to_api = requests.post(apiReturn, data=data)
     return send_to_api
 
 def verify_api_token(func):
@@ -361,7 +366,6 @@ def verify_api_token(func):
         return func(request, *args, **kwargs)
     return wrapper
 
-@verify_api_token
 @csrf_exempt
 def CreateSubAccount(request):
     if request.method == 'POST':
@@ -370,6 +374,7 @@ def CreateSubAccount(request):
             data = json.loads(request.body)
             username = request.session.get('username')
             email = User.objects.filter(username=username).first().email
+            print(data)
             if data['email'] == email:
                 data['token'] = token
                 request.session['api_token'] = token
