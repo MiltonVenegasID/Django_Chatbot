@@ -40,8 +40,7 @@
                 <span class="btn-group">
                     <button class="fake-button" onclick="sendMessage()" id="btn"><i
                             class="large material-icons">send</i></button>
-                    <button class="fake-button"><i
-                            class="large material-icons">warning</i></button>
+                    <button class="fake-button"><i class="large material-icons">sound</i></button>
                 </span>
             </div>
         </div>
@@ -61,48 +60,6 @@
 </body>
 
 <script>
-
-    let audioRec = {audio: true};
-    navigator.mediaDevices.getUserMedia(audioRec)
-
-    .then(function(mediaStreamObj){
-        let audio = document.querySelector('Audio');
-        if("srcObject" in audio){
-            audio.srcObject = mediaStreamObj;
-        }
-        else{
-            audio.srcObject = window.URL
-            .createObjectURL(mediaStreamObj);
-        }
-
-        audio.onloadedmetadata = function (ev){
-            audio.play();
-        };
-        
-        let start = document.getElementById('btnAudio');
-        let mediaRecorder = new MediaRecorder(mediaStreamObj);
-        start.addEventListener('mousedown', function(ev) {
-            mediaRecorder.start();
-        })
-        start.addEventListener('mouseUp', function(ev){
-            mediaRecorder.stop();
-        })
-        mediaRecorder.ondataavailable = function(ev){
-            dataArray.push(ev.data);
-        }
-        let dataArray = [];
-
-        mediaRecorder.onstop = function(ev){
-            let audioData = new Blob(dataArray,
-                {'type': 'audio/mp3;'}
-            );
-            dataArray = [];
-
-            let audioSrc = window.URL
-            .createObjectURL(audioData);
-            playAudio.src = audioSrc;
-        }
-    })
 
     document.querySelector('video').playbackRate = 0.80;
     document.addEventListener('DOMContentLoaded', function () {
@@ -138,7 +95,7 @@
             .catch(error => console.error('Error:', error));
     }
 
-    
+
     function borrarIris() {
         fetch('borrarIris', {
             method: 'GET',
@@ -164,6 +121,47 @@
             alert('Por favor seleccione al menos un dispositivo');
         }
     }
+    let recognition;
+    let isListening = false;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-MX';
+        recognition.interimResults = false;
+        recognition.continuous = false;
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.trim();
+            document.getElementById('newUserInput').value = transcript;
+            sendMessage(transcript);
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+        };
+    } else {
+        alert('Your browser does not support speech recognition. Try using Chrome.');
+    }
+
+    document.getElementById('voiceButton').addEventListener('mousedown', () => {
+        if (recognition && !isListening) {
+            isListening = true;
+            recognition.start();
+        }
+    });
+
+    document.getElementById('voiceButton').addEventListener('mouseup', () => {
+        if (recognition && isListening) {
+            isListening = false;
+            recognition.stop();
+        }
+    });
+
 
 
     async function sendMessage(message = null) {
