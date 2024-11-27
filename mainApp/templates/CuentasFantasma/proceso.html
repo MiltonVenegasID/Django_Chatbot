@@ -40,7 +40,7 @@
                 <span class="btn-group">
                     <button class="fake-button" onclick="sendMessage()" id="btn"><i
                             class="large material-icons">send</i></button>
-                    <button class="fake-button"><i class="large material-icons">sound</i></button>
+                    <button class="fake-button" id="voiceButton"><i class="large material-icons">keyboard_voice</i></button>
                 </span>
             </div>
         </div>
@@ -145,7 +145,7 @@
             isListening = false;
         };
     } else {
-        alert('Your browser does not support speech recognition. Try using Chrome.');
+        alert('Tu navegador no permite reconocimiento de voz, intenta en otro navegador.');
     }
 
     document.getElementById('voiceButton').addEventListener('mousedown', () => {
@@ -244,10 +244,14 @@
         });
 
         const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        var selected = new Array();
+        
         Array.from(checkboxes).forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
-                if (checkbox.name.startsWith('device_')) {
-                    updateDeviceSelection(checkbox);
+                for(var i = 0; i < checkboxes.length; i++) {
+                    if(checkboxes[i].checked){
+                        selected.push(checkboxes[i].value)
+                    }
                 }
             });
         });
@@ -285,7 +289,7 @@
             }
         });
 
-
+        
         data.expire = document.getElementById('expire').checked;
         data.delete_expired = document.getElementById('delete_expired').checked;
         data.active = document.getElementById('active').checked;

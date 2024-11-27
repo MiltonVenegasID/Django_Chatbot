@@ -376,6 +376,7 @@ def CreateSubAccount(request):
             email = User.objects.filter(username=username).first().email
             print(data)
             if data['email'] == email:
+                
                 data['token'] = token
                 request.session['api_token'] = token
                 data_as_json = json.dumps(data)
