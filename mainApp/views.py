@@ -348,7 +348,7 @@ class Iris(LoginRequiredMixin, View):
             return PermissionDenied()
         
 def send_to_api(apiReturn, data):
-    #send_to_api = requests.post(apiReturn, data=data)
+    send_to_api = requests.post(apiReturn, data=data)
     return send_to_api
 
 def verify_api_token(func):
@@ -376,7 +376,6 @@ def CreateSubAccount(request):
             formData = {key: value for key, value in data.items() if key != 'Imei'}
             username = request.session.get('username')
             email = User.objects.filter(username=username).first().email
-            print(data)
             if data['email'] == email:
                 
                 data['token'] = token
@@ -385,10 +384,12 @@ def CreateSubAccount(request):
                 expected_format = {
                     "message": "create",
                     "data":{**formData, 
-                            "Imei": selected_imeis.split(',') if selected_imeis else []},
+                            "imei": selected_imeis.split(',') if selected_imeis else []},
                     "key": "hashpartial"
                 }
                 data_as_json = json.dumps(expected_format)
+                
+                print(data_as_json)
                 send_to_api(apiReturn, data_as_json)
                 if send_to_api:
                     return JsonResponse({

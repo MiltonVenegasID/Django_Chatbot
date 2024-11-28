@@ -119,6 +119,7 @@ class CuentaEspejo(LogicAdapter):
         html_Conj += "<form id='mirrorAccountForm'><br>"
         id_session = user.id
         html_Conj += f'''
+            <input type="hidden" id="share_id" name="share_id" value="false">
             <label for="active">Activo</label>
             <input type="checkbox" id="active" name="active" value="true">
             <br>

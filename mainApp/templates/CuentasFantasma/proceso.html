@@ -97,31 +97,8 @@
     }
 
 
-    function borrarIris() {
-        fetch('borrarIris', {
-            method: 'GET',
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message);
-            })
-            .catch(error => console.error('Error:', error));
-    }
+    
 
-    function EnviarImei() {
-        var selected = [];
-        var checkboxes = document.getElementsByName('selected_devices');
-        for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].checked) {
-                selected.push(checkboxes[i].value);
-            }
-        }
-        if (selected.length > 0) {
-            alert('IMEIs seleccionados: ' + selected.join(', '));
-        } else {
-            alert('Por favor seleccione al menos un dispositivo');
-        }
-    }
     let recognition;
     let isListening = false;
 
@@ -289,20 +266,19 @@
         });
 
         const Imei = [];
-        const checkboxes = document.getElementsByName('selected_devices');
+        const checkboxes = document.getElementsByName('Imei');
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                Imei.push(checkbox.value);
+                    Imei.push(checkbox.value);
+                    Imei.join(', ');
             }
         });
 
         if (Imei.length > 0) {
             data['Imei'] = Imei.join(',');
-        } else{
-            alert('Por favor, seleccione por lo menos un imei')
         }
 
-
+        data.share_id = document.getElementById('share_id').checked;
         data.expire = document.getElementById('expire').checked;
         data.delete_expired = document.getElementById('delete_expired').checked;
         data.active = document.getElementById('active').checked;
