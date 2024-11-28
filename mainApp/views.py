@@ -372,6 +372,8 @@ def CreateSubAccount(request):
         token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
         try:
             data = json.loads(request.body)
+            selected_imeis = data.get('Imei', '')
+            formData = {key: value for key, value in data.items() if key != 'Imei'}
             username = request.session.get('username')
             email = User.objects.filter(username=username).first().email
             print(data)
@@ -379,16 +381,15 @@ def CreateSubAccount(request):
                 
                 data['token'] = token
                 request.session['api_token'] = token
-                data_as_json = json.dumps(data)
                 apiReturn = settings.API_SHARE
-                expected_format = '{'
-                expected_format += f"""
+                expected_format = {
                     "message": "create",
-                    "data":{data_as_json},
+                    "data":{**formData, 
+                            "Imei": selected_imeis.split(',') if selected_imeis else []},
                     "key": "hashpartial"
-                """
-                expected_format += '}'
-                send_to_api(apiReturn, expected_format)
+                }
+                data_as_json = json.dumps(expected_format)
+                send_to_api(apiReturn, data_as_json)
                 if send_to_api:
                     return JsonResponse({
                     'success': True,

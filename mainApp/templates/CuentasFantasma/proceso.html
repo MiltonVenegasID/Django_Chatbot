@@ -40,7 +40,8 @@
                 <span class="btn-group">
                     <button class="fake-button" onclick="sendMessage()" id="btn"><i
                             class="large material-icons">send</i></button>
-                    <button class="fake-button" id="voiceButton"><i class="large material-icons">keyboard_voice</i></button>
+                    <button class="fake-button" id="voiceButton"><i
+                            class="large material-icons">keyboard_voice</i></button>
                 </span>
             </div>
         </div>
@@ -245,11 +246,11 @@
 
         const checkboxes = container.querySelectorAll('input[type="checkbox"]');
         var selected = new Array();
-        
+
         Array.from(checkboxes).forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
-                for(var i = 0; i < checkboxes.length; i++) {
-                    if(checkboxes[i].checked){
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].checked) {
                         selected.push(checkboxes[i].value)
                     }
                 }
@@ -284,12 +285,24 @@
 
         const data = {};
         formData.forEach((value, key) => {
-            if (form.elements[key]) {
-                data[key] = form.elements[key].value;
+            data[key] = value;
+        });
+
+        const Imei = [];
+        const checkboxes = document.getElementsByName('selected_devices');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                Imei.push(checkbox.value);
             }
         });
 
-        
+        if (Imei.length > 0) {
+            data['Imei'] = Imei.join(',');
+        } else{
+            alert('Por favor, seleccione por lo menos un imei')
+        }
+
+
         data.expire = document.getElementById('expire').checked;
         data.delete_expired = document.getElementById('delete_expired').checked;
         data.active = document.getElementById('active').checked;
