@@ -46,8 +46,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 ALLOWED_HOSTS = []
 EMAIL_PORT = config.email_port
 
-
-
 # Application definition
 
 GET_USERS = config.get_users
@@ -77,6 +75,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     )
+}
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
 

@@ -1,7 +1,5 @@
 from chatterbot.logic import LogicAdapter
 from chatterbot.conversation import Statement
-import pymysql
-import spacy
 import re
 import requests
 from mainApp.models import *
@@ -11,7 +9,6 @@ import json
 from Crypto.Hash import MD5
 from datetime import datetime
 import hashlib
-import openai
 from django.conf import settings
 import numpy as np
 
@@ -88,6 +85,7 @@ class CuentaEspejo(LogicAdapter):
         user = self.request.user
         get_user_objects = settings.GET_USER_OBJECTS
         get_user_objects += user.username
+        print(get_user_objects)
         object_response = requests.get(get_user_objects)
         object_response.raise_for_status()
         object_data_api = object_response.json()
@@ -119,23 +117,8 @@ class CuentaEspejo(LogicAdapter):
         html_Conj += "<form id='mirrorAccountForm'><br>"
         id_session = user.id
         html_Conj += f'''
-            <input type="hidden" id="share_id" name="share_id" value="false">
-            <label for="active">Activo</label>
-            <input type="checkbox" id="active" name="active" value="true">
-            <br>
-            <label for="user_id">Nombre:</label>
-            <input type="text" id="user_id" name="user_id" value="{id_session}" required >
-            <br>
-            <label for="correo">Correo:</label>
-            <input type="email" id="email" name="email" required value="{user.email}">
-            <br>
-            <label for="phone">Telefono:</label>
-            <input type="tel" id="phone" name="phone" required value="{user.phone_number}">
-            <br>
+                   
             
-            <label for="expire">Expira</label>
-            <input type="checkbox" id="expire" name="expire">
-            <br>
         '''
         table_html = '<div style="max-height: 400px; overflow-y: auto;">'
         table_html += '<table class="table table_string">'
@@ -145,7 +128,7 @@ class CuentaEspejo(LogicAdapter):
         for index, (name, imei) in enumerate(zip(nameFromImei, Imei)):
             
             table_html += '<tr>'
-            table_html += f'<td><input type="checkbox" name="Imei" id="checked" value="{imei}" onchange="updateDeviceSelection({index})"></td>'
+            table_html += f'<td><input type="checkbox" name="Imei" class="checked" value="{imei}" onchange="updateDeviceSelection({index})"></td>'
             table_html += f'<td>{name}<p value="{name}"></td>'
             table_html += f'<td>{imei}<p value="{imei}"></td>'
             table_html += '</tr>'
@@ -204,7 +187,7 @@ class GetApi(LogicAdapter):
             try:
                 response = requests.get(url)
                 response.raise_for_status()  
-                api_data = response.json()   
+                api_data = response.json()
 
                 if isinstance(api_data, list) and len(api_data) > 0:
                     index = next((i for i, item in enumerate(api_data) 
@@ -443,7 +426,6 @@ class apikeyConjunt(LogicAdapter):
                     context['error'] = "No hay objetos que mostrar"
             except requests.RequestException as e: 
                 context['error'] = "Error en la solicitud: {}".format(e)
-            
             response_text = f"{key_user_data}"
         else:
             response_text = "No tienes permisos para ejecutar esta accion"

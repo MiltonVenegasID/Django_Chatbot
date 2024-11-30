@@ -1,3 +1,123 @@
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function initializeDynamicElements(parentElement) {
+    const buttons = parentElement.querySelectorAll('.select-adapter');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const selectedValue = button.getAttribute('data-value');
+            sendMessage(selectedValue);
+        });
+    });
+}
+
+function initializeDynamicElements(container) {
+    const forms = container.getElementsByTagName('form');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (form.id === 'mirrorAccountForm') {
+                SendMirrorAccount(form);
+            }
+        });
+    });
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    var selected = new Array();
+
+    Array.from(checkboxes).forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    selected.push(checkboxes[i].value)
+                }
+            }
+        });
+    });
+
+    const buttons = container.getElementsByTagName('button');
+    Array.from(buttons).forEach(button => {
+        button.addEventListener('click', (e) => {
+            if (button.getAttribute('onclick')) {
+                const functionName = button.getAttribute('onclick').replace('()', '');
+                if (typeof window[functionName] === 'function') {
+                    window[functionName]();
+                }
+            }
+        });
+    });
+}
+
+let recognition;
+let isListening = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-MX';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.trim();
+        document.getElementById('newUserInput').value = transcript;
+        sendMessage(transcript);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+    };
+} else {
+    alert('Tu navegador no permite reconocimiento de voz, intenta en otro navegador.');
+}
+
+document.getElementById('voiceButton').addEventListener('mousedown', () => {
+    if (recognition && !isListening) {
+        isListening = true;
+        recognition.start();
+    }
+});
+
+document.getElementById('voiceButton').addEventListener('mouseup', () => {
+    if (recognition && isListening) {
+        isListening = false;
+        recognition.stop();
+    }
+});
+
+
+document.querySelector('video').playbackRate = 0.80;
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.addEventListener('click', function (event) {
+            if (event.target.classList.contains('select-adapter')) {
+                const selectedValue = event.target.getAttribute('data-value');
+
+                sendMessage(selectedValue);
+            }
+        });
+    });
+
+    function toggleSpinner(show) {
+        const loader = document.getElementById('loader');
+        loader.style.display = show ? 'block' : 'none';
+    }
+
 const makeApiCall = async (url, method = 'GET', body = null) => {
     const headers = {
         'X-CSRFToken': window.CSRF_TOKEN
@@ -6,6 +126,7 @@ const makeApiCall = async (url, method = 'GET', body = null) => {
     if (body) {
         headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
+    
 
     try {
         const response = await fetch(url, {
@@ -62,3 +183,12 @@ async function sendMessage() {
         userInput.value = '';
     }
 }
+
+var input = document.getElementById("newUserInput");
+
+input.addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("btn").click();
+    }
+});

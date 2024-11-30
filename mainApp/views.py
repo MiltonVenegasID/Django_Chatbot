@@ -348,8 +348,9 @@ class Iris(LoginRequiredMixin, View):
             return PermissionDenied()
         
 def send_to_api(apiReturn, data):
-    send_to_api = requests.post(apiReturn, data=data)
-    return send_to_api
+    #send_to_api = requests.post(apiReturn, data=data)
+    #send_to_api.json()
+    print(data)
 
 def verify_api_token(func):
     @wraps(func)
@@ -366,41 +367,64 @@ def verify_api_token(func):
         return func(request, *args, **kwargs)
     return wrapper
 
-@csrf_exempt
 def CreateSubAccount(request):
     if request.method == 'POST':
         token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
+        get_user = settings.GET_USER_OBJECTS
+        get_user += request.user.username
+        req_response = requests.get(get_user)
+        req_data = req_response.json()
+        
+        if isinstance(req_data, list) and len(req_data) > 0:
+            index = next((i for i, item in enumerate (req_data) if item['username'] == request.user.username), None)
+            
+        if index != -1:
+            user_id = req_data[index]
+            select_id = user_id.get('user_id')
         try:
             data = json.loads(request.body)
             selected_imeis = data.get('Imei', '')
-            formData = {key: value for key, value in data.items() if key != 'Imei'}
-            username = request.session.get('username')
-            email = User.objects.filter(username=username).first().email
-            if data['email'] == email:
-                
+            if len(selected_imeis) > 0:
+                selected_date = data.get('expire_dt')
+                selected_name = data.get('name')
+                formData = {key: value for key, value in data.items() if key != 'Imei'}
                 data['token'] = token
                 request.session['api_token'] = token
                 apiReturn = settings.API_SHARE
+                aglome = datetime.now().strftime('%Y-%m-%d')
+                Construct_name= f'DEV_{aglome}_{select_id}'
+                constr_name = {"name": Construct_name}
+                expire_add = {"expire": False}
                 expected_format = {
                     "message": "create",
-                    "data":{**formData, 
+                    "data":{
+                            "active": True,
+                            "share_id": "",
+                            "user_id": select_id,
+                            "email": "",
+                            "phone": "",
+                            "expire": True,
+                            **formData,
                             "imei": selected_imeis.split(',') if selected_imeis else []},
                     "key": "hashpartial"
                 }
+
+                if selected_date == "" or selected_date == None:
+                    expected_format['data'].update(expire_add)
+
+                if selected_name == "" or selected_name == None:
+                    expected_format['data'].update(constr_name)
+
                 data_as_json = json.dumps(expected_format)
-                
-                print(data_as_json)
                 send_to_api(apiReturn, data_as_json)
-                if send_to_api:
+                if send_to_api != None:
                     return JsonResponse({
-                    'success': True,
                     'response': 'Cuenta espejo creada con exito'
                 })
             else:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Credenciales invalidas'
-                })
+                print("No hay IMEIS")
+                return JsonResponse({'response': 'No se selecciono imei'})
+            
         except Exception as e:
             return JsonResponse({
                 'success': False,
