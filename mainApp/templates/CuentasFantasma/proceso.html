@@ -62,24 +62,6 @@
 
 <script src="{% static 'js/chat.js' %}"></script>
 <script>
-    function ConsumoApi() {
-        fetch('ApiGet', {
-            method: 'GET',
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta HTTP: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data.message);
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-
-
     async function sendMessage(message = null) {
         const userMessage = message || document.getElementById('newUserInput').value;
         const chatLog = document.getElementById('chatLog');
@@ -138,54 +120,60 @@
         }
     }
 
-    function SendMirrorAccount() {
-        const button = document.querySelector("button[onclick='SendMirrorAccount()']");
-        button.disabled = true; 
+    function SendMirrorAccount(event) {
+    event.preventDefault();
+    
+    const button = document.querySelector("button[onclick='SendMirrorAccount()']");
 
-        const form = document.getElementById('mirrorAccountForm');
-        const formData = new FormData(form);
+    const form = document.getElementById('mirrorAccountForm');
+    const formData = new FormData(form);
 
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
 
-        const Imei = [];
-        const checkboxes = document.getElementsByName('Imei');
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                Imei.push(checkbox.value);
-            }
-        });
-
-        if (Imei.length > 0) {
-            data['Imei'] = Imei.join(',');
+    const Imei = [];
+    const checkboxes = document.getElementsByName('Imei');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            Imei.push(checkbox.value);
         }
+    });
 
-        data.delete_expired = document.getElementById('delete_expired').checked;
-
-        fetch('CreateSubAccount', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => {
-                const chatLog = document.getElementById('chatLog');
-                chatLog.innerHTML += `<div class="logs success">Cuenta creada exitosamente</div>`;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const chatLog = document.getElementById('chatLog');
-                chatLog.innerHTML += `<div class="logs error">Error: No se pudo procesar la solicitud</div>`;
-            })
-            .finally(() => {
-                button.disabled = false; 
-            });
+    if (Imei.length > 0) {
+        data['Imei'] = Imei.join(',');
     }
+
+    data.delete_expired = document.getElementById('delete_expired').checked;
+    
+    fetch('CreateSubAccount', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(data => {
+            const chatLog = document.getElementById('chatLog');
+            if (Imei.length == 0) {
+                chatLog.innerHTML += `<div id="System">System: No se agrego ningun imei</div>`;
+            } else {
+                chatLog.innerHTML += `<div class="logs" id="Bot">IRIS: Cuenta creada exitosamente</div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const chatLog = document.getElementById('chatLog');
+            chatLog.innerHTML += `<div class="logs" id="Bot">Error: No se pudo procesar la solicitud</div>`;
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
+}
+
 
 </script>
 

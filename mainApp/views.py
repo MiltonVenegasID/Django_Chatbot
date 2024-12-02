@@ -347,19 +347,23 @@ class Iris(LoginRequiredMixin, View):
         else:
             return PermissionDenied()
 
-def create_jwt_token(user_id, secret_key, algorithm="HS256"):
+def create_jwt_token(request, algorithm="HS256"):
     payload = {
         #Usar request en vez de user_id, tal vez si coloco la informacion del usuario una vez se logea
-        "user_id": user_id,
+        "user_id": request.user.id,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),  
         "iat": datetime.datetime.utcnow()  
     }
+    print(payload)
     #secret_key = settings from php
     #TODO
-    token = jwt.encode(payload, secret_key, algorithm=algorithm)
+    token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
     return token
 
-def send_to_api(apiReturn, data, user_id):
+def send_to_api(apiReturn, request, data):
+    
+    user_id = request.user.id
+    print(user_id)
     jwt_token = create_jwt_token(user_id)
 
     headers = {
@@ -368,8 +372,9 @@ def send_to_api(apiReturn, data, user_id):
     }
 
     try:
-        response = requests.post(apiReturn, data=json.dumps(data), headers=headers)
-
+        print("Hola Mundo")
+        response = requests.post(apiReturn, data, headers=headers)
+        print(response)
         if response.status_code == 200:
             return response.json()  
         else:

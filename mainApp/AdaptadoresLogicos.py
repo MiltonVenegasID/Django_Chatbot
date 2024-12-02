@@ -85,7 +85,6 @@ class CuentaEspejo(LogicAdapter):
         user = self.request.user
         get_user_objects = settings.GET_USER_OBJECTS
         get_user_objects += user.username
-        print(get_user_objects)
         object_response = requests.get(get_user_objects)
         object_response.raise_for_status()
         object_data_api = object_response.json()
@@ -113,8 +112,8 @@ class CuentaEspejo(LogicAdapter):
         hashed.update(to_hash.encode('utf-8'))  
         transformed_hash = hashed.hexdigest().upper()
         Agglomerated_string = root_url +  forced_string + transformed_hash
-        html_Conj = "Para poder entregar un acceso a tu cuenta espejo, por favor llena el siguiente formulario"
-        html_Conj += "<form id='mirrorAccountForm'><br>"
+        html_Conj = "Para poder entregar un acceso a tu cuenta espejo, por favor llena el siguiente formulario \n"
+        html_Conj += "<form id='mirrorAccountForm'>"
         id_session = user.id
         html_Conj += f'''
                    
@@ -152,7 +151,7 @@ class CuentaEspejo(LogicAdapter):
             <label for="su">SU:</label>
             <input type="text" id="su" name="su" required value="{transformed_hash}">
             <br>
-            <button type="button" onclick="SendMirrorAccount()">Enviar</button>
+            <button type="button" id="RequestTwice" onclick="SendMirrorAccount(event)">Enviar</button>
         '''
         html_Conj += "</form>"
         html_Conj += f"<a href='{Agglomerated_string}'>Link de acceso</a>"

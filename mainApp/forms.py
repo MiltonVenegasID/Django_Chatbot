@@ -46,7 +46,7 @@ class CustomAuthenticationForm(AuthenticationForm):
     def  __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    Usuario = forms.CharField( widget=forms.TextInput(attrs={'id': 'usuariosClass', 'label': 'Usuario'}))
+    Usuario = forms.CharField( widget=forms.TextInput(attrs={'id': 'usuariClass', 'label': 'Usuario'}))
     Contraseña = forms.CharField( widget=forms.PasswordInput(attrs={'id': 'usuariosClass', 'label': 'Contraseña'}))
     def set_request(self, request):
         self.request = request

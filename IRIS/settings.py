@@ -48,6 +48,7 @@ EMAIL_PORT = config.email_port
 
 # Application definition
 
+SECRET_KEY_JWT = config.jwt_key
 GET_USERS = config.get_users
 GET_USER_OBJECTS = config.get_user_objects
 OBJECT_GET_LOCATIONS = config.object_get_locations
