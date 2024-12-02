@@ -32,7 +32,7 @@ import base64
 from functools import wraps
 import hmac
 import hashlib
-import html
+import jwt
 
 stemmer = SnowballStemmer("spanish")
 lemmatizer = WordNetLemmatizer()
@@ -346,11 +346,39 @@ class Iris(LoginRequiredMixin, View):
             return render(request, 'CuentasFantasma/proceso.html')
         else:
             return PermissionDenied()
-        
-def send_to_api(apiReturn, data):
-    #send_to_api = requests.post(apiReturn, data=data)
-    #send_to_api.json()
-    print(data)
+
+def create_jwt_token(user_id, secret_key, algorithm="HS256"):
+    payload = {
+        #Usar request en vez de user_id, tal vez si coloco la informacion del usuario una vez se logea
+        "user_id": user_id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),  
+        "iat": datetime.datetime.utcnow()  
+    }
+    #secret_key = settings from php
+    #TODO
+    token = jwt.encode(payload, secret_key, algorithm=algorithm)
+    return token
+
+def send_to_api(apiReturn, data, user_id):
+    jwt_token = create_jwt_token(user_id)
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {jwt_token}' 
+    }
+
+    try:
+        response = requests.post(apiReturn, data=json.dumps(data), headers=headers)
+
+        if response.status_code == 200:
+            return response.json()  
+        else:
+            print(f"Request failed with status code {response.status_code}")
+            print(f"Response text: {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return None
 
 def verify_api_token(func):
     @wraps(func)
@@ -416,11 +444,9 @@ def CreateSubAccount(request):
                     expected_format['data'].update(constr_name)
 
                 data_as_json = json.dumps(expected_format)
-                send_to_api(apiReturn, data_as_json)
-                if send_to_api != None:
-                    return JsonResponse({
-                    'response': 'Cuenta espejo creada con exito'
-                })
+                response = send_to_api(apiReturn, data_as_json)
+                if response is not None:
+                    return JsonResponse({'response': 'Cuenta espejo creada con éxito'})
             else:
                 print("No hay IMEIS")
                 return JsonResponse({'response': 'No se selecciono imei'})

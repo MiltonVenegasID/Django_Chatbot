@@ -132,7 +132,6 @@ class CuentaEspejo(LogicAdapter):
             table_html += f'<td>{name}<p value="{name}"></td>'
             table_html += f'<td>{imei}<p value="{imei}"></td>'
             table_html += '</tr>'
-            #Depurar aun mas el imei, guardarlo en un array antes de mandarlo y enviar solamente los id separados por comas
             
         table_html += '</tbody></table></div>'
         

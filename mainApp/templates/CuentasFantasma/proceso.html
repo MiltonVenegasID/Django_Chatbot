@@ -138,9 +138,10 @@
         }
     }
 
-
-
     function SendMirrorAccount() {
+        const button = document.querySelector("button[onclick='SendMirrorAccount()']");
+        button.disabled = true; 
+
         const form = document.getElementById('mirrorAccountForm');
         const formData = new FormData(form);
 
@@ -153,8 +154,7 @@
         const checkboxes = document.getElementsByName('Imei');
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                    Imei.push(checkbox.value);
-                    Imei.join(', ');
+                Imei.push(checkbox.value);
             }
         });
 
@@ -175,15 +175,17 @@
             .then(response => response.json())
             .then(data => {
                 const chatLog = document.getElementById('chatLog');
-
+                chatLog.innerHTML += `<div class="logs success">Cuenta creada exitosamente</div>`;
             })
             .catch(error => {
                 console.error('Error:', error);
                 const chatLog = document.getElementById('chatLog');
                 chatLog.innerHTML += `<div class="logs error">Error: No se pudo procesar la solicitud</div>`;
+            })
+            .finally(() => {
+                button.disabled = false; 
             });
     }
-
 
 </script>
 
