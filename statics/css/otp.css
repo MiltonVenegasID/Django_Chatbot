@@ -1,6 +1,6 @@
 @import url("mvp.css");
 
-.entrada{
+.entrada {
     font-size: 38px;
     display: flex;
     justify-content: center;
@@ -9,7 +9,22 @@
     color: #FFFFFF;
 }
 
-#iris1{
+#Align-OTP {
+    margin-top: 8%;
+}
+
+.Body_default {
+    height: 100vh;
+    background: rgb(50, 104, 152);
+    background: linear-gradient(0deg, rgba(50, 104, 152, 1) 20%, rgba(0, 212, 255, 1) 100%);
+}
+
+.Image_Align {
+    display: flex;
+    justify-content: center;
+}
+
+#iris1 {
     font-size: 40px;
     display: flex;
     justify-content: center;
@@ -17,26 +32,26 @@
     color: #FFFFFF;
 }
 
-.btn-primary{
+.btn-primary {
     font-size: 13px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.otp-container{
+.otp-container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#OTPContainer{
+#OTPContainer {
     top: 0;
     position: relative;
 }
 
 
-.TituloOTP{
+.TituloOTP {
     display: flex;
     justify-content: center;
     font-size: 30px;
@@ -44,7 +59,7 @@
 
 }
 
-.message{
+.message {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -53,7 +68,7 @@
     margin-left: 2%;
 }
 
-.btn .btn-primary{
+.btn .btn-primary {
     font-size: 13px;
     display: flex;
     height: 10%;
@@ -62,7 +77,7 @@
 }
 
 @media only screen and (min-width: 700) and (max-width: 1300) {
-    .message{
+    .message {
         font-size: 16px;
         display: flex;
         justify-content: center;

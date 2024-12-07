@@ -38,7 +38,7 @@ class TestRegister(forms.ModelForm):
 class OTPForm(forms.Form):
     otp = forms.CharField(
         max_length=6, 
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter OTP'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese OTP...'}),
         label="OTP"
     )
         

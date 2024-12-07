@@ -102,7 +102,8 @@ chatbot = CustomChatBot('IRIS',
     {'import_path': 'mainApp.AdaptadoresLogicos.apikeyConjunt'},
     {'import_path': 'mainApp.AdaptadoresLogicos.CuentaEspejo'},
     {'import_path': 'mainApp.AdaptadoresLogicos.UniqueUser'},
-    {'import_path': 'mainApp.AdaptadoresLogicos.FallBack'}
+    {'import_path': 'mainApp.AdaptadoresLogicos.FallBack'},
+    {'import_path': 'mainApp.AdaptadoresLogicos.EditarCuentaEspejo'}
 ]  
 )
 
@@ -121,7 +122,7 @@ class TextToSpeech:
         self.engine = pyttsx3.init()
         self.loop_running = False
         self.engine.setProperty('rate', self.engine.getProperty('rate') * 0.8)
-        self.engine.setProperty('volume', 1.0)
+        self.engine.setProperty('volume', 0.0)
 
     def speak(self, text):
         if not self.loop_running:
@@ -347,36 +348,43 @@ class Iris(LoginRequiredMixin, View):
         else:
             return PermissionDenied()
 
-def create_jwt_token(request, algorithm="HS256"):
+def create_jwt_token(select_id, algorithm="HS256"):
     payload = {
         #Usar request en vez de user_id, tal vez si coloco la informacion del usuario una vez se logea
-        "user_id": request.user.id,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),  
-        "iat": datetime.datetime.utcnow()  
+        "user_id": select_id,
+        "exp": datetime.now() + timedelta(hours = 1),
+        "iat": datetime.now()
     }
-    print(payload)
     #secret_key = settings from php
     #TODO
     token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
     return token
 
-def send_to_api(apiReturn, request, data):
-    
-    user_id = request.user.id
-    print(user_id)
-    jwt_token = create_jwt_token(user_id)
-
+def send_to_api(apiReturn, data, select_id):
+    jwt_token = create_jwt_token(select_id)
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {jwt_token}' 
     }
-
+    
+    test = json.dumps(headers)
+    print(test)
     try:
-        print("Hola Mundo")
-        response = requests.post(apiReturn, data, headers=headers)
-        print(response)
-        if response.status_code == 200:
-            return response.json()  
+        response = requests.Request(method="POST", url=apiReturn, json=data, headers = headers)
+        session = requests.Session()
+        prep = response.prepare()
+        full_request = f"""
+        --- Prepared Request ---
+        URL: {prep.url}
+        Headers:
+        {prep.headers}
+        
+        Body:
+        {prep.body}
+        """
+        new_res = session.send(prep)
+        if new_res.status_code == 200:
+            return new_res.json()  
         else:
             print(f"Request failed with status code {response.status_code}")
             print(f"Response text: {response.text}")
@@ -423,12 +431,12 @@ def CreateSubAccount(request):
                 formData = {key: value for key, value in data.items() if key != 'Imei'}
                 data['token'] = token
                 request.session['api_token'] = token
-                apiReturn = settings.API_SHARE
                 aglome = datetime.now().strftime('%Y-%m-%d')
+                apiReturn = settings.API_SHARE
                 Construct_name= f'DEV_{aglome}_{select_id}'
                 constr_name = {"name": Construct_name}
                 expire_add = {"expire": False}
-                expected_format = {
+                data = {
                     "message": "create",
                     "data":{
                             "active": True,
@@ -443,13 +451,12 @@ def CreateSubAccount(request):
                 }
 
                 if selected_date == "" or selected_date == None:
-                    expected_format['data'].update(expire_add)
+                    data['data'].update(expire_add)
 
                 if selected_name == "" or selected_name == None:
-                    expected_format['data'].update(constr_name)
+                    data['data'].update(constr_name)
 
-                data_as_json = json.dumps(expected_format)
-                response = send_to_api(apiReturn, data_as_json)
+                response = send_to_api(apiReturn, data, select_id)
                 if response is not None:
                     return JsonResponse({'response': 'Cuenta espejo creada con éxito'})
             else:
@@ -466,6 +473,33 @@ def CreateSubAccount(request):
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
             
+def EditSubAccount(request):
+    if request.method == 'POST':
+        get_user = settings.GET_USER_OBJECTS
+        get_user += request.user.username
+        req_response = request.get(get_user)
+        req_data = req_response.json()
+        
+        if isinstance(req_data, list) and len(req_data) > 0:
+            index = next((i for i, item in enumerate(req_data) if item['username'] == request.user.username), None)
+            
+        if index != -1:
+            user_id = req_data[index]
+            select_id = user_id.get('user_id')
+            
+def LinkSubAccount(request):
+    endpoint = "https://atlantida2.mx/index.php?su="
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            expected_format = {
+                "message": "update",
+                "data": {
+                    
+                }
+            }
+        except:
+            return JsonResponse({'error': 'Tu peticion no ha sido verificada, por favor'})
     
 class Med(View):
     def get(self, request):

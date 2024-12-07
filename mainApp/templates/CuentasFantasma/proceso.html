@@ -19,24 +19,29 @@
     <source src="/statics/video/vecteezy_blue-particles-swirl-background_1908940.mp4" type="video/mp4">
 </video>
 
-<body>
-    <div class="pure-g">
-        <div class="pure-u-2-24 header-element">
-            <a type="button" href="{% url 'logout' %}" class="Logout-Button"><i
-                    class="large material-icons">logout</i></a>
-        </div>
-        <div class="pure-u-2-24 header-element">
-            <a type="button" href="{% url 'Registro' %}" class="Logout-Button"><i
-                    class="large material-icons">person_add</i></a>
+<body id="Iris_Body">
+    <div class="header">
+        <div class="pure-g">
+            <div class="pure-u-1-3 header-element">
+                <a type="button" href="{% url 'logout' %}" id="Logout-Button"><i
+                        class="small material-icons">logout</i></a>
+            </div>
+            <div class="pure-u-1-3 header-element" id="ChatTitle">
+                <p id="Title_Iris">IRIS</p>
+
+            </div>
+            <div class="pure-u-1-3 header-element" id="AddDiv">
+                <a type="button" href="{% url 'Registro' %}" id="Add_Button"><i
+                        class="small material-icons">person_add</i></a>
+            </div>
         </div>
     </div>
 
     <div class="ChatBot">
         <div class="AreaConversacion">
-            <h1 class="TitleChat">IRIS</h1>
             <div id="chatLog"></div>
             <div class="msg-box">
-                <input type="text" class="ip-msg" id="newUserInput" maxlength="100" placeholder="type something.." />
+                <input type="text" class="ip-msg" id="newUserInput" maxlength="100" placeholder="Escribe algo..." />
                 <span class="btn-group">
                     <button class="fake-button" onclick="sendMessage()" id="btn"><i
                             class="large material-icons">send</i></button>
@@ -121,58 +126,60 @@
     }
 
     function SendMirrorAccount(event) {
-    event.preventDefault();
-    
-    const button = document.querySelector("button[onclick='SendMirrorAccount()']");
+        event.preventDefault();
 
-    const form = document.getElementById('mirrorAccountForm');
-    const formData = new FormData(form);
+        const button = document.querySelector("button[onclick='SendMirrorAccount()']");
 
-    const data = {};
-    formData.forEach((value, key) => {
-        data[key] = value;
-    });
+        const form = document.getElementById('mirrorAccountForm');
+        const formData = new FormData(form);
 
-    const Imei = [];
-    const checkboxes = document.getElementsByName('Imei');
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            Imei.push(checkbox.value);
-        }
-    });
-
-    if (Imei.length > 0) {
-        data['Imei'] = Imei.join(',');
-    }
-
-    data.delete_expired = document.getElementById('delete_expired').checked;
-    
-    fetch('CreateSubAccount', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(data => {
-            const chatLog = document.getElementById('chatLog');
-            if (Imei.length == 0) {
-                chatLog.innerHTML += `<div id="System">System: No se agrego ningun imei</div>`;
-            } else {
-                chatLog.innerHTML += `<div class="logs" id="Bot">IRIS: Cuenta creada exitosamente</div>`;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const chatLog = document.getElementById('chatLog');
-            chatLog.innerHTML += `<div class="logs" id="Bot">Error: No se pudo procesar la solicitud</div>`;
-        })
-        .finally(() => {
-            button.disabled = false;
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
         });
-}
+
+        const Imei = [];
+        const checkboxes = document.getElementsByName('Imei');
+        const su = document.getElementById('su');
+        const url = "https://atlantida2.mx/index.php?su=" + su.value;
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                Imei.push(checkbox.value);
+            }
+        });
+
+        if (Imei.length > 0) {
+            data['Imei'] = Imei.join(',');
+        }
+
+        data.delete_expired = document.getElementById('delete_expired').checked;
+
+        fetch('CreateSubAccount', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                const chatLog = document.getElementById('chatLog');
+                if (Imei.length == 0) {
+                    chatLog.innerHTML += `<div id="System">System: No se agrego ningun imei</div>`;
+                } else {
+                    chatLog.innerHTML += `<div class="logs" id="Bot"><a href="${url}">Siga este link para adquirir su cuenta espejo</a></div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const chatLog = document.getElementById('chatLog');
+                chatLog.innerHTML += `<div class="logs" id="Bot">Error: No se pudo procesar la solicitud</div>`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+    }
 
 
 </script>

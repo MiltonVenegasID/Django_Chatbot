@@ -102,9 +102,6 @@ class CuentaEspejo(LogicAdapter):
             objects_user = object_data_api[index_object]
             nameFromImei = [obj.get('name') for obj in objects_user.get('objects', [])]
             Imei = [obj.get('imei') for obj in objects_user.get('objects', [])]
-            df = pd.DataFrame(data = {'Nombre': nameFromImei, 'Imei': Imei })
-        
-            
         
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         to_hash = f'{user.email}{current_time}'
@@ -114,21 +111,18 @@ class CuentaEspejo(LogicAdapter):
         Agglomerated_string = root_url +  forced_string + transformed_hash
         html_Conj = "Para poder entregar un acceso a tu cuenta espejo, por favor llena el siguiente formulario \n"
         html_Conj += "<form id='mirrorAccountForm'>"
-        id_session = user.id
         html_Conj += f'''
-                   
-            
         '''
         table_html = '<div style="max-height: 400px; overflow-y: auto;">'
         table_html += '<table class="table table_string">'
-        table_html += '<thead><tr><th>Seleccionar</th><th>Nombre</th><th>IMEI</th></tr></thead>'
+        table_html += '<thead><tr><th id="add_sr">Añadir</th><th>Nombre</th><th>IMEI</th></tr></thead>'
         table_html += '<tbody>'
         
         for index, (name, imei) in enumerate(zip(nameFromImei, Imei)):
             
             table_html += '<tr>'
-            table_html += f'<td><input type="checkbox" name="Imei" class="checked" value="{imei}" onchange="updateDeviceSelection({index})"></td>'
-            table_html += f'<td>{name}<p value="{name}"></td>'
+            table_html += f'<td><input type="checkbox" name="Imei" class="check" value="{imei}"></td>'
+            table_html += f'<td class="middleTd">{name}<p value="{name}"></td>'
             table_html += f'<td>{imei}<p value="{imei}"></td>'
             table_html += '</tr>'
             
@@ -146,7 +140,7 @@ class CuentaEspejo(LogicAdapter):
             <input type="text" id="name" name="name">
             <br>
             <label for="delete_expired">Eliminar al expirar</label>
-            <input type="checkbox" id="delete_expired" name="delete_expired">
+            <input type="checkbox" id="delete_expired" class="check" name="delete_expired">
             <br>
             <label for="su">SU:</label>
             <input type="text" id="su" name="su" required value="{transformed_hash}">
@@ -154,11 +148,45 @@ class CuentaEspejo(LogicAdapter):
             <button type="button" id="RequestTwice" onclick="SendMirrorAccount(event)">Enviar</button>
         '''
         html_Conj += "</form>"
-        html_Conj += f"<a href='{Agglomerated_string}'>Link de acceso</a>"
         response_statement = Statement(text = html_Conj)
         response_statement.confidence = 1
         return response_statement
 
+class EditarCuentaEspejo(LogicAdapter):
+    def __init__(self, chatbot, **kwargs):
+        super().__init__(chatbot, **kwargs)
+        
+    def set_request(self, request):
+        self.request = request
+    
+    def can_process(self, statement):
+        words = ['necesito editar una cuenta espejo']
+        return any(word in statement.text.lower() for word in words)
+    
+    def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
+        html = "Aqui esta una lista de las cuentas espejo activas actualmente, eligue las que desees modificar"
+        html += """
+        <ul>
+        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        </ul>
+        """
+        
+        
+        response_statement = Statement(text=html)
+        response_statement.confidence = 1
+        return response_statement
+    
+class EliminarCuentaEspejo(LogicAdapter):
+    def __init__(self, chatbot, **kwargs):
+        super().__init__(chatbot, **kwargs)
+    
+    def set_request(self, request):
+        self.request = request
         
 class GetApi(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
@@ -453,7 +481,7 @@ class apikeyConjunt(LogicAdapter):
             imeis = [obj.get('imei') for obj in objects_user.get('objects', [])]
             df = pd.DataFrame(data={'Nombre': names, 'Imei': imeis})
             table_html = '<table class="table table_string">'
-            table_html += '<thead><tr><th>Seleccionar</th><th>Nombre</th><th>IMEI</th></tr></thead>'
+            table_html += '<thead><tr><th>Añadir</th><th>Nombre</th><th>IMEI</th></tr></thead>'
             table_html += '<tbody>'
             for i, (name, imei) in enumerate(zip(names, imeis)):
                 table_html += f'<tr>'

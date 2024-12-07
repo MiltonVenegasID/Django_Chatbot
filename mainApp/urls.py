@@ -15,5 +15,6 @@ urlpatterns = [
     path('RegistroVista', VistaRegistro.as_view(), name='Registro'),
     path('Test', Med.as_view(), name=  'Test'),
     path('CreateSubAccount', CreateSubAccount, name='CreateSubAccount'),
+    path('LinkSubAccount', LinkSubAccount, name="LinkSubAccount")
     
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
