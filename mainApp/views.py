@@ -474,29 +474,41 @@ def CreateSubAccount(request):
 #FIX
 def EditSubAccount(request):
     if request.method == 'POST':
-        get_user = settings.GET_USER_OBJECTS
-        get_user += request.user.username
-        req_response = requests.get(get_user)
-        req_data = req_response.json()
-        
-        if isinstance(req_data, list) and len(req_data) > 0:
-            index = next((i for i, item in enumerate(req_data) if item['username'] == request.user.username), None)
-            
-            if index is not None:
-                user_id = req_data[index]
-                select_id = user_id.get('user_id')
-                
-                active_mirror_accounts = []  
-                for account in req_data:
-                    if account.get('active'): 
-                        active_mirror_accounts.append({
-                            'share_id': account.get('share_id'),
-                            'username': account.get('username'),
-                        })
-                
-                return JsonResponse({'active_mirror_accounts': active_mirror_accounts})
-        
-        return JsonResponse({'error': 'No active mirror accounts found'}, status=404)
+        try:
+            data = json.loads(request.body)
+            share_id = data.get('share_id')
+            if not share_id:
+                return JsonResponse({'error': 'Error interno'}, status=400)
+
+            get_user = settings.GET_USER_OBJECTS
+            get_user += request.user.username
+            req_response = requests.get(get_user)
+            req_data = req_response.json()
+
+            if isinstance(req_data, list) and len(req_data) > 0:
+                index = next((i for i, item in enumerate(req_data) if item['username'] == request.user.username), None)
+
+                if index is not None:
+                    user_id = req_data[index]
+                    select_id = user_id.get('user_id')
+                    account_to_edit = next((account for account in req_data if account.get('share_id') == share_id), None)
+
+                    if account_to_edit:
+                        #Edit
+                        account_to_edit.update(data.get('data', {}))
+
+                        return JsonResponse({'response': 'Cuenta espejo actualizada con éxito'})
+                    else:
+                        return JsonResponse({'error': 'No share_id'}, status=404)
+
+            return JsonResponse({'error': 'Bo existen cuentas espejo activas'}, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+    return JsonResponse({'error': 'Metodo no permitido para esta cuenta'}, status=405)
 
 def LinkSubAccount(request):
     endpoint = "https://atlantida2.mx/index.php?su="
