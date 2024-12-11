@@ -18,7 +18,7 @@ class FallBack(LogicAdapter):
         super().__init__(chatbot, **kwargs)
         
     def can_process(self, statement):
-        words = ['codigoamarillo', '350']
+        words = ['codigoamarillo', '350', 'cntas espejo']
         return any(word in statement.text.lower() for word in words)
 
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
@@ -244,48 +244,6 @@ class GetApi(LogicAdapter):
 
         return response_statement
 
-class uh(LogicAdapter):
-    def __init__(self, chatbot, **kwargs):
-        super().__init__(chatbot, **kwargs)
-        self.request = None
-        
-    def set_request(self, request):
-        self.request = request
-        
-    def can_process(self, statement):
-        words = ['mis equipos', 'dame informacion de mis equipos', 'mis equipos en la empresa', 'revisar equipos']
-        return any(word in statement.text.lower() for word in words)
-
-    def process(self, input_statement, additional_response_selection_parameters=None):
-        if self.request and self.request.user.is_authenticated:
-            user = self.request.user
-            fix_statement = input_statement.text.split()
-
-            data_equipo = equipos.objects.filter(Usuario=user)
-
-            if data_equipo.exists():
-                
-                if 'ATL' in fix_statement:
-                    Assigned_Empresa = data_equipo.filter(Empresa=1)
-                if ['EPCOM', 'epcom'] in fix_statement:
-                    Assigned_Empresa = data_equipo.filter(Empresa=2)
-                if ['MAX',  'max'] in fix_statement:
-                    Assigned_Empresa = data_equipo.filter(Empresa=3)
-                equipos_data = [{'Nombre': equipo.Nombre, 'Imei': equipo.Imei,} for equipo in Assigned_Empresa]
-                df = pd.DataFrame(equipos_data)
-                table_html = df.to_html(index=False, classes='table table_string')
-
-                response_text = f"Tus equipos son: <br>{table_html}"
-            else:
-                response_text = "No tienes equipos disponibles."
-        else:
-            response_text = "Debes estar autenticado para ver tus equipos."
-
-        response_statement = Statement(text=response_text)
-        response_statement.confidence = 1
-        return response_statement
-            
-
 class ClimaApi(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
@@ -357,7 +315,7 @@ class apikeyConjunt(LogicAdapter):
         self.request = request
     
     def can_process(self, statement):
-        words = ['Universo', 'Universos', '300', 'codigonaranja']
+        words = ['Universo', 'Universos', '300', 'mis equipos']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):            
@@ -434,6 +392,7 @@ class apikeyConjunt(LogicAdapter):
                             else:
                                 if index != -1:
                                     objects_user = object_data_api[index_object]
+                                    print(objects_user)
                                     report = [f"{obj.get('name')} {obj.get('imei')}" for obj in objects_user.get('objects', [])]
                                     df = pd.DataFrame(report, columns=["name_imei"])
                                     list_html = '<ul>'
@@ -476,7 +435,6 @@ class apikeyConjunt(LogicAdapter):
 
         if index_object != 1:
             objects_user = object_data_api[index_object]
-            
             names = [obj.get('name') for obj in objects_user.get('objects', [])]
             imeis = [obj.get('imei') for obj in objects_user.get('objects', [])]
             df = pd.DataFrame(data={'Nombre': names, 'Imei': imeis})
@@ -698,6 +656,7 @@ class UniqueUser(LogicAdapter):
                 response = requests.get(api_constructed)
                 response.raise_for_status()
                 api_data = response.json()
+                print(api_data)
                 if isinstance(api_data, list) and len(api_data) > 0:
                     index = next((i for i, item in enumerate(api_data)
                                 if item.get('username') == user.username and

@@ -9,7 +9,6 @@ from django.http import JsonResponse, HttpResponse
 import pyttsx3
 from .AdaptadoresLogicos import *
 import wikipedia
-from nltk.tokenize import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
 from nltk.stem import WordNetLemmatizer
 import threading
@@ -26,7 +25,6 @@ from django.conf import settings
 import openai
 from django.core.mail import get_connection, send_mail
 from django.core.exceptions import PermissionDenied
-from django.views.decorators.csrf import csrf_exempt
 import json
 import base64
 from functools import wraps
@@ -94,7 +92,6 @@ chatbot = CustomChatBot('IRIS',
     {'import_path': 'mainApp.AdaptadoresLogicos.AyudaBase'},
     {'import_path': 'mainApp.AdaptadoresLogicos.GetApi'},
     {'import_path': 'mainApp.AdaptadoresLogicos.Entendimiento'},
-    {'import_path': 'mainApp.AdaptadoresLogicos.uh'},
     {'import_path': 'mainApp.AdaptadoresLogicos.PruebaUnit'},
     {'import_path': 'mainApp.AdaptadoresLogicos.Nombre'},   
     {'import_path': 'mainApp.AdaptadoresLogicos.Take_Objects'},
@@ -358,13 +355,14 @@ def create_jwt_token(select_id, algorithm="HS256"):
     #secret_key = settings from php
     #TODO
     token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
+    print(token)
     return token
 
 def send_to_api(apiReturn, data, select_id):
     jwt_token = create_jwt_token(select_id)
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {jwt_token}' 
+        'Authorization': f'{jwt_token}' 
     }
     
     test = json.dumps(headers)
@@ -473,20 +471,33 @@ def CreateSubAccount(request):
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
             
+#FIX
 def EditSubAccount(request):
     if request.method == 'POST':
         get_user = settings.GET_USER_OBJECTS
         get_user += request.user.username
-        req_response = request.get(get_user)
+        req_response = requests.get(get_user)
         req_data = req_response.json()
         
         if isinstance(req_data, list) and len(req_data) > 0:
             index = next((i for i, item in enumerate(req_data) if item['username'] == request.user.username), None)
             
-        if index != -1:
-            user_id = req_data[index]
-            select_id = user_id.get('user_id')
-            
+            if index is not None:
+                user_id = req_data[index]
+                select_id = user_id.get('user_id')
+                
+                active_mirror_accounts = []  
+                for account in req_data:
+                    if account.get('active'): 
+                        active_mirror_accounts.append({
+                            'share_id': account.get('share_id'),
+                            'username': account.get('username'),
+                        })
+                
+                return JsonResponse({'active_mirror_accounts': active_mirror_accounts})
+        
+        return JsonResponse({'error': 'No active mirror accounts found'}, status=404)
+
 def LinkSubAccount(request):
     endpoint = "https://atlantida2.mx/index.php?su="
     if request.method == 'POST':
