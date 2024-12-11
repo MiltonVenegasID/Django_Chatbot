@@ -11,6 +11,7 @@ from datetime import datetime
 import hashlib
 from django.conf import settings
 import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 class FallBack(LogicAdapter):
@@ -151,6 +152,63 @@ class CuentaEspejo(LogicAdapter):
         response_statement = Statement(text = html_Conj)
         response_statement.confidence = 1
         return response_statement
+
+class TakeMirrorAccounts(LogicAdapter):
+    def __init__(self, chatbot, **kwargs):
+        super().__init__(chatbot, **kwargs)
+        
+    def set_request(self, request):
+        self.request = request
+        
+    def can_process(self, statement):
+        words = ['ver cuentas espejo']
+        return any(word in statement.text.lower() for word in words)
+    
+    def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):
+        # user = self.request.user
+        #
+        # get_mirror_account = settings.GET_MIRROR_ACCOUNTS
+        # 
+        # get_response = requests.get(get_mirror_account)
+        # 
+        # get_response.raise_for_status()
+        # 
+        # get_data_api = get_response.json()   
+        # 
+        # url = "https://atlantida2.mx/index.php?su=" + su.value; 
+        # 
+        # if instance(get_data_api, list) and len(get_data_api) > 0:
+        # 
+        # index = next((i for i, item in enumerate(get_data_api)
+        # 
+        # if item.get('username') == user.username))
+        #
+        # else:
+        # 
+        # html = "No se econtraron datos de tu cuenta"
+        # 
+        # response_statement = Statement(text = html)
+        # 
+        # response_statement.confidence = 1
+        # 
+        # return response_statement
+        #
+        # if index !=1 :
+        # 
+        # objects_get = get_data_api[index]
+        # 
+        # name_imei = [obj.get('name') for obj in objects_get.get('objects', [])]
+        # 
+        # imei_MA = [obj.get('imei') for obj in objects_get.get('objects', [])]
+        html = "Aqui tienes una lista de cuentas espejo activas actualmente"
+        html += "<ul>"
+        
+        # for index, (name, imei) in enumerate(zip(name_imei, imei_MA)):
+        #     html += "<li>" + name + "</li>"
+        
+        html += "</ul>"
+        
+        
 
 class EditarCuentaEspejo(LogicAdapter):
     def __init__(self, chatbot, **kwargs):

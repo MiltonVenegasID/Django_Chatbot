@@ -181,6 +181,41 @@
             });
     }
 
+    function EditMirrorAccount(event){
+        event.preventDefault();
+
+        const button = document.querySelector("button[onclick='EditMirrorAccount()']");
+        const form = document.getElementById('editMirrorAccountForm');
+        const formData = new FormData(form);
+
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        //Need to add some functions here for every data label that is picked, maybe if i use another fetch?
+        fetch('EditSubAccount', {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                const chatLog = document.getElementById('chatLog');
+                chatLog.innerHTML += `<div class="logs" id="Bot">La cuenta espejo fue editada exitosamente</div>`
+            }) 
+            .catch(error => {
+                console.error('Error:', error);
+                const chatLog = document.getElementById('chatLog');
+                chatLog.innerHTML += `<div class="logs" id="Bot">Error: No se pudo procesar la solicitud</div>`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+    }
+
 
 </script>
 
