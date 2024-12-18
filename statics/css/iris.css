@@ -36,6 +36,19 @@
     background: radial-gradient(circle, rgba(16, 37, 199, 1) 11%, rgba(36, 43, 125, 1) 99%);
 }
 
+#SearchTable{
+    padding-left: 30px;
+}
+
+#SearchIcon {
+    color: #000;
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
 #chatLog {
     height: 85%;
     overflow-y: scroll;
@@ -200,7 +213,62 @@ a[type="button"]{
     }
 }
 
-.table {
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    padding: 8px;
+    background-color: #f4f4f4;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+li:hover {
+    background-color: #ddd;
+}
+.form-container {
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #000000;
+    width: 300px;
+    margin-top: 10px;
+    display: none; 
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+input, button {
+    padding: 10px;
+    margin: 5px;
+}
+.form-container.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(10px); 
+}
+
+.pagination {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.pagination li {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: #337ab7;
+}
+
+.pagination a:hover {
+    color: #23527c;
+}
+
+.sortable {
     display: grid;
 }
 
@@ -358,3 +426,30 @@ div.msg-box span.btn-group i {
     bottom: 0;
     z-index: -1;
 }
+.sortable th {
+    cursor: pointer;
+ }
+ .sortable th.no-sort {
+    pointer-events: none;
+ }
+ .sortable th::after, 
+ .sortable th::before {
+  transition: color 0.2s ease-in-out;
+  font-size: 1.2em;
+  color: transparent;
+ }
+ .sortable th::after {
+    margin-left: 3px;
+    content: '\025B8';
+ }
+ .sortable th:hover::after {
+    color: inherit;
+ }
+ .sortable th.dir-d::after {
+    color: inherit;
+    content: '\025BE';
+ }
+ .sortable th.dir-u::after {
+    color: inherit;
+    content: '\025B4';
+ }

@@ -13,6 +13,11 @@
     margin-top: 8%;
 }
 
+form{
+    display: block;
+    justify-content: center;
+}
+
 .Body_default {
     height: 100vh;
     background: rgb(50, 104, 152);
@@ -56,6 +61,14 @@
     justify-content: center;
     font-size: 30px;
     font-family: League;
+
+}
+
+#TextRecapOTP{
+    justify-content: end;
+    display: grid;
+    text-align: center;
+    align-items: center;
 
 }
 

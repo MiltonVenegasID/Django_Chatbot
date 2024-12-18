@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/base-min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <title>Iris</title>
 </head>
 
@@ -125,6 +126,32 @@
         }
     }
 
+    function SendTest(event) {
+        event.preventDefault();
+        const button = document.querySelector("button[onclick='SendTest()']");
+
+        fetch('TestMirrorAccount', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const chatLog = document.getElementById('chatLog');
+                chatLog.innerHTML += `<div class="logs" id="Bot"><a href="#">Llego</a></div>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const chatLog = document.getElementById('chatLog');
+                chatLog.innerHTML += `<div class="logs" id="Bot">Error: No se pudo procesar la solicitud</div>`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+    }
+
     function SendMirrorAccount(event) {
         event.preventDefault();
 
@@ -181,7 +208,7 @@
             });
     }
 
-    function EditMirrorAccount(event){
+    function EditMirrorAccount(event) {
         event.preventDefault();
 
         const button = document.querySelector("button[onclick='EditMirrorAccount()']");
@@ -205,7 +232,7 @@
             .then(data => {
                 const chatLog = document.getElementById('chatLog');
                 chatLog.innerHTML += `<div class="logs" id="Bot">La cuenta espejo fue editada exitosamente</div>`
-            }) 
+            })
             .catch(error => {
                 console.error('Error:', error);
                 const chatLog = document.getElementById('chatLog');
@@ -216,6 +243,138 @@
             });
     }
 
+    var $rows = $('#TableForMA tbody tr');
+    $('#SearchTable').keyup(function () {
+        var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+        $rows.show().filter(function () {
+            var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+            return !~text.indexOf(val);
+        }).hide();
+    });
+
+    document.addEventListener('click', function (e) {
+        try {
+            function findElementRecursive(element, tag) {
+                return element.nodeName === tag ? element :
+                    findElementRecursive(element.parentNode, tag)
+            }
+            var descending_th_class = ' dir-d '
+            var ascending_th_class = ' dir-u '
+            var ascending_table_sort_class = 'asc'
+            var regex_dir = / dir-(u|d) /
+            var regex_table = /\bsortable\b/
+            var alt_sort = e.shiftKey || e.altKey
+            var element = findElementRecursive(e.target, 'TH')
+            var tr = findElementRecursive(element, 'TR')
+            var table = findElementRecursive(tr, 'TABLE')
+            function reClassify(element, dir) {
+                element.className = element.className.replace(regex_dir, '') + dir
+            }
+            function getValue(element) {
+                return (
+                    (alt_sort && element.getAttribute('data-sort-alt')) ||
+                    element.getAttribute('data-sort') || element.innerText
+                )
+            }
+            if (regex_table.test(table.className)) {
+                var column_index
+                var nodes = tr.cells
+                for (var i = 0; i < nodes.length; i++) {
+                    if (nodes[i] === element) {
+                        column_index = element.getAttribute('data-sort-col') || i
+                    } else {
+                        reClassify(nodes[i], '')
+                    }
+                }
+                var dir = descending_th_class
+                if (
+                    element.className.indexOf(descending_th_class) !== -1 ||
+                    (table.className.indexOf(ascending_table_sort_class) !== -1 &&
+                        element.className.indexOf(ascending_th_class) == -1)
+                ) {
+                    dir = ascending_th_class
+                }
+                reClassify(element, dir)
+                var org_tbody = table.tBodies[0]
+                var rows = [].slice.call(org_tbody.rows, 0)
+                var reverse = dir === ascending_th_class
+                rows.sort(function (a, b) {
+                    var x = getValue((reverse ? a : b).cells[column_index])
+                    var y = getValue((reverse ? b : a).cells[column_index])
+                    return isNaN(x - y) ? x.localeCompare(y) : x - y
+                })
+                var clone_tbody = org_tbody.cloneNode()
+                while (rows.length) {
+                    clone_tbody.appendChild(rows.splice(0, 1)[0])
+                }
+                table.replaceChild(clone_tbody, org_tbody)
+            }
+        } catch (error) {
+        }
+    });
+
+    const rowsPerPage = 5;
+    let currentPage = 1;
+    function displayTable(page) {
+        const table = document.getElementById("TableForMA");
+        const startIndex = (page - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const slicedData = data.slice(startIndex, endIndex);
+
+        slicedData.forEach(item => {
+            const row = table.insertRow();
+            const nameCell = row.insertCell(0);
+            const emailCell = row.insertCell(1);
+            const cityCell = row.insertCell(2);
+            nameCell.innerHTML = item.name;
+            emailCell.innerHTML = item.email;
+            cityCell.innerHTML = item.city;
+        });
+
+        updatePagination(page);
+    }
+
+    function updatePagination(currentPage) {
+        const pageCount = Math.ceil(data.length / rowsPerPage);
+        const paginationContainer = document.getElementById("pagination");
+        paginationContainer.innerHTML = "";
+
+        for (let i = 1; i <= pageCount; i++) {
+            const pageLink = document.createElement("a");
+            pageLink.href = "#";
+            pageLink.innerText = i;
+            pageLink.onclick = function () {
+                displayTable(i);
+            };
+            if (i === currentPage) {
+                pageLink.style.fontWeight = "bold";
+            }
+            paginationContainer.appendChild(pageLink);
+            paginationContainer.appendChild(document.createTextNode(" "));
+        }
+    }
+
+    displayTable(currentPage);
+
+    async function Searcher() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("SearchTable");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("TableForMA");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.lenght; i++) {
+            td = tr[i].getElementsByTagName("td")[1] || tr[i].getElementsByTagName("td")[2];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
 
 </script>
 

@@ -3,18 +3,30 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import *
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from phonenumber_field.formfields import PhoneNumberField
 
 User = get_user_model()
 
 class CustomUserCreationForm(UserCreationForm):
-    username = forms.CharField(required=True, label='Usuario', strip=False)
-    email = forms.EmailField(required=True, label='Correo')
-    first_name = forms.CharField(required=True,  label='Nombre')
-    last_name = forms.CharField(required=True, label='Apellidos')
-    phone_number = forms.IntegerField(required=True, label='Telefono')
-    password1 = forms.CharField(required=True, label='Contraseña')
-    password2 = forms.CharField(required=True, label='Confirmar Contraseña')
-    user_type = forms.ChoiceField(choices=users_type.objects.values_list('id', 'NombreType'), label='Tipo de Usuario')    
+    username = forms.CharField(required=True, label='Usuario', strip=False, widget=forms.TextInput(attrs={'aria-label': 'Usuario', 'class': 'form-control'}))
+    email = forms.EmailField(required=True, label='Correo', widget=forms.EmailInput(attrs={'aria-label': 'Correo', 'class': 'form-control'}))
+    first_name = forms.CharField(required=True, label='Nombre', widget=forms.TextInput(attrs={'aria-label': 'Nombre', 'class': 'form-control'}))
+    last_name = forms.CharField(required=True, label='Apellidos', widget=forms.TextInput(attrs={'aria-label': 'Apellidos', 'class': 'form-control'}))
+    phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': '', 'aria-label': 'Telefono', 'class': 'form-control'}), label=("Telefono"), required=True)
+    password1 = forms.CharField(
+     label="Contraseña",
+     strip=False,
+     widget=forms.PasswordInput
+    )
+    password2 = forms.CharField(widget=forms.PasswordInput, required=True, label='Confirmar Contraseña')
+    user_type = forms.ModelChoiceField(
+        queryset=users_type.objects.all(),
+        label='Tipo de Usuario',
+        to_field_name='id',
+        empty_label=None,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    
     class Meta:
         model = User
         fields = ['username', 'email', 'phone_number', 'first_name', 'last_name', 'user_type', 'password1', 'password2']

@@ -1,3 +1,44 @@
+function mostrarFormulario(event, elemento) {
+    const liElement = event.target;
+
+    const formularioExistente = liElement.nextElementSibling;
+    if (formularioExistente && formularioExistente.classList.contains('form-container')) {
+        formularioExistente.classList.remove('show');
+        setTimeout(() => formularioExistente.remove(), 300); 
+    }
+
+    const formularioAnterior = document.querySelector('.form-container');
+    if (formularioAnterior) {
+        formularioAnterior.classList.remove('show');
+        setTimeout(() => formularioAnterior.remove(), 300);
+    }
+
+    const formContainer = document.createElement('div');
+    formContainer.classList.add('form-container');
+
+    formContainer.innerHTML = `
+        <h3>Actualizar Información</h3>
+        e
+    `;
+
+    liElement.insertAdjacentElement('afterend', formContainer);
+
+    setTimeout(() => {
+        formContainer.classList.add('show');
+    }, 10); 
+}
+
+function actualizar(elemento) {
+    const nuevoNombre = document.getElementById('item-name').value;
+    alert('Elemento "' + elemento + '" actualizado a: ' + nuevoNombre);
+}
+
+function eliminar(elemento) {
+    if (confirm('¿Estás seguro de que deseas eliminar el elemento "' + elemento + '"?')) {
+        alert('Elemento "' + elemento + '" eliminado');
+    }
+}
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -103,36 +144,36 @@ document.getElementById('voiceButton').addEventListener('mouseup', () => {
 
 
 document.querySelector('video').playbackRate = 0.80;
-    document.addEventListener('DOMContentLoaded', function () {
-        document.body.addEventListener('click', function (event) {
-            if (event.target.classList.contains('select-adapter')) {
-                const selectedValue = event.target.getAttribute('data-value');
+document.addEventListener('DOMContentLoaded', function () {
+    document.body.addEventListener('click', function (event) {
+        if (event.target.classList.contains('select-adapter')) {
+            const selectedValue = event.target.getAttribute('data-value');
 
-                sendMessage(selectedValue);
-            }
-        });
+            sendMessage(selectedValue);
+        }
     });
+});
 
-    function toggleSpinner(show) {
-        const loader = document.getElementById('loader');
-        loader.style.display = show ? 'block' : 'none';
-    }
+function toggleSpinner(show) {
+    const loader = document.getElementById('loader');
+    loader.style.display = show ? 'block' : 'none';
+}
 
 const makeApiCall = async (url, method = 'GET', body = null) => {
     const headers = {
         'X-CSRFToken': window.CSRF_TOKEN
     };
-    
+
     if (body) {
         headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
-    
+
 
     try {
         const response = await fetch(url, {
             method,
             headers,
-            credentials: 'same-origin', 
+            credentials: 'same-origin',
             body
         });
 
@@ -192,3 +233,4 @@ input.addEventListener("keypress", function (event) {
         document.getElementById("btn").click();
     }
 });
+

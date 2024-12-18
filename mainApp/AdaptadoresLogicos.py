@@ -11,7 +11,9 @@ from datetime import datetime
 import hashlib
 from django.conf import settings
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+        
 
 
 class FallBack(LogicAdapter):
@@ -43,13 +45,22 @@ class FallBack(LogicAdapter):
 class InformacionUsuario(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
+        self.keywords = np.array(['Informacion de mi usuario', 'Info usuario', 'Informacion usuario'])
 
     def set_request(self, request):
         self.request = request
 
     def can_process(self, statement):
-        words = ['soy', 'mi usuario', 'mis datos', 'mi datos', 'informacion acerca de mi cuenta']
-        return  any(word in statement.text.lower() for word in words)
+        input_text = statement.text.lower()
+        return self._calculate_similarity(input_text) > 0.6
+    
+    def _calculate_similarity(self, input_text):
+        vectorizer = TfidfVectorizer()
+        transform = vectorizer.fit_transform(self.keywords)
+        vectors = vectorizer.transform([input_text])
+        cosine_similarities = cosine_similarity(vectors, transform).flatten()
+        return max(cosine_similarities)
+    
 
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
         if self.request and self.request.user.is_authenticated:
@@ -72,13 +83,22 @@ class InformacionUsuario(LogicAdapter):
 class CuentaEspejo(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
+        self.keywords = np.array(['Realizar cuenta espejo', 'Solicitud de cuentas espejo'])
         
     def set_request(self, request):
         self.request = request
 
     def can_process(self, statement):
-        words = ['realizar cuenta espejo', 'realizar una cuenta espejo', 'hacer cuenta espejo', 'solicito cuenta espejo', 'quiero cuenta espejo', 'necesito una cuenta espejo', 'ocupo una cuenta espejo', 'solicitud de cuentas espejo']
-        return any(word in statement.text.lower() for word in words)
+        input_text = statement.text.lower()
+        return self._calculate_similarity(input_text) > 0.6
+    
+    def _calculate_similarity(self, input_text):
+        vectorizer = TfidfVectorizer()
+        transform = vectorizer.fit_transform(self.keywords)
+        vectors = vectorizer.transform([input_text])
+        cosine_similarities = cosine_similarity(vectors, transform).flatten()
+        return max(cosine_similarities)
+    
     
     def process(self, input_statement, additional_response_selection_parameters = None,  **kwargs):
         root_url = "https://atlantida2.mx"
@@ -115,9 +135,10 @@ class CuentaEspejo(LogicAdapter):
         html_Conj += f'''
         '''
         table_html = '<div style="max-height: 400px; overflow-y: auto;">'
-        table_html += '<table class="table table_string">'
+        table_html += '<div style="position: relative;"><input id="SearchTable" type="text" onkeyup="Searcher()"><i class="medium material-icons" id="SearchIcon">search</i></div>'
+        table_html += '<table class="sortable" id="TableForMA">'
         table_html += '<thead><tr><th id="add_sr">Añadir</th><th>Nombre</th><th>IMEI</th></tr></thead>'
-        table_html += '<tbody>'
+        table_html += '<tbody id="TableCreateMA">'
         
         for index, (name, imei) in enumerate(zip(nameFromImei, Imei)):
             
@@ -127,7 +148,7 @@ class CuentaEspejo(LogicAdapter):
             table_html += f'<td>{imei}<p value="{imei}"></td>'
             table_html += '</tr>'
             
-        table_html += '</tbody></table></div>'
+        table_html += '</tbody></table><div id="pagination"></div></div>'
         
         
         html_Conj += table_html
@@ -152,6 +173,33 @@ class CuentaEspejo(LogicAdapter):
         response_statement = Statement(text = html_Conj)
         response_statement.confidence = 1
         return response_statement
+    
+class MirrorAccountSend(LogicAdapter):
+    def __init__(self, chatbot, **kwargs):
+        super().__init__(chatbot, **kwargs)
+        self.keywords = np.array(['get test', 'usertest'])
+        
+    def set_request(self, request):
+        self.request = request
+        
+    def can_process(self, statement):
+        input_text = statement.text.lower()
+        return self._calculate_similarity(input_text) > 0.7
+    
+    def _calculate_similarity(self, input_text):
+        vectorizer = TfidfVectorizer()
+        transform = vectorizer.fit_transform(self.keywords)
+        vectors = vectorizer.transform([input_text])
+        cosine_similarities = cosine_similarity(vectors, transform).flatten()
+        return max(cosine_similarities)
+    
+    def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):
+        html = "Envio de post para verificar envio de datos"
+        html += "<br>"
+        html += '<button onclick="SendTest(event)">Enviar</button>'
+        response_statement = Statement(text = html)
+        response_statement.confidence = 1
+        return response_statement
 
 class TakeMirrorAccounts(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
@@ -165,40 +213,24 @@ class TakeMirrorAccounts(LogicAdapter):
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):
-        # user = self.request.user
-        #
+        user = self.request.user
         # get_mirror_account = settings.GET_MIRROR_ACCOUNTS
-        # 
         # get_response = requests.get(get_mirror_account)
-        # 
         # get_response.raise_for_status()
         # 
         # get_data_api = get_response.json()   
-        # 
         # url = "https://atlantida2.mx/index.php?su=" + su.value; 
-        # 
         # if instance(get_data_api, list) and len(get_data_api) > 0:
-        # 
         # index = next((i for i, item in enumerate(get_data_api)
-        # 
         # if item.get('username') == user.username))
-        #
         # else:
-        # 
         # html = "No se econtraron datos de tu cuenta"
-        # 
         # response_statement = Statement(text = html)
-        # 
         # response_statement.confidence = 1
-        # 
         # return response_statement
-        #
         # if index !=1 :
-        # 
         # objects_get = get_data_api[index]
-        # 
         # name_imei = [obj.get('name') for obj in objects_get.get('objects', [])]
-        # 
         # imei_MA = [obj.get('imei') for obj in objects_get.get('objects', [])]
         html = "Aqui tienes una lista de cuentas espejo activas actualmente"
         html += "<ul>"
@@ -218,19 +250,19 @@ class EditarCuentaEspejo(LogicAdapter):
         self.request = request
     
     def can_process(self, statement):
-        words = ['necesito editar una cuenta espejo']
+        words = ['490']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
         html = "Aqui esta una lista de las cuentas espejo activas actualmente, eligue las que desees modificar"
         html += """
         <ul>
-        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
-        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
-        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
-        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
-        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
-        <li><a href="#">ejemplo de cuenta espejo a editar</a></li>
+        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
+        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
+        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
+        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
+        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
+        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
         </ul>
         """
         

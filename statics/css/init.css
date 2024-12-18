@@ -267,7 +267,7 @@ form{
     -webkit-backdrop-filter: blur(3.1px);
     border-right: 1px solid rgba(255, 255, 255, 0.37);
     width: 85%;
-    height: 50%;
+    height: fit-content;
     padding: 5%;
     border: 1px solid black;
 }
@@ -534,7 +534,7 @@ form{
     }
 }
 
-@media (min-width: 601px) and (max-width: 800px) {
+@media (min-width: 601px) and (max-width: 1000px) {
     .BorderCard {
         height: 90%;
     }

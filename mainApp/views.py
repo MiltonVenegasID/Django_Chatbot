@@ -31,6 +31,8 @@ from functools import wraps
 import hmac
 import hashlib
 import jwt
+import vertexai
+from vertexai.generative_model import GenerativeModel, Part, SafetySetting
 
 stemmer = SnowballStemmer("spanish")
 lemmatizer = WordNetLemmatizer()
@@ -60,11 +62,53 @@ class CustomChatBot(ChatBot):
                     break
         
         if response is None or response.confidence < 0.2:
-            fallback_response = Chat_GPT(input_statement.text)
+            fallback_response = generate(input_statement.text)
             response = fallback_response
         
         return response
     
+def generate(User_Input):
+    vertexai.init(project="dev-atenea-1", location="us-central1")
+    model = GenerativeModel(
+        "gemini-exp-1206",
+        system_instruction=[textsi_1]
+    )
+    responses = model.generate_content(
+        [{User_Input}],
+        generation_config=generation_config,
+        safety_settings=safety_settings,
+        stream=True,
+    )
+
+    for response in responses:
+        print(response.text, end="")
+
+textsi_1 = """Eres una inteligencia artificial enfocada en proveer los servicios de seguridad de transporte que la empresa provee"""
+
+generation_config = {
+    "max_output_tokens": 2048,
+    "temperature": 1,
+    "top_p": 1,
+}
+
+safety_settings = [
+    SafetySetting(
+        category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+    ),
+    SafetySetting(
+        category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+    ),
+    SafetySetting(
+        category=SafetySetting.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+    ),
+    SafetySetting(
+        category=SafetySetting.HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+    ),
+]
 
 def Chat_GPT(user_text):
 
@@ -100,7 +144,8 @@ chatbot = CustomChatBot('IRIS',
     {'import_path': 'mainApp.AdaptadoresLogicos.CuentaEspejo'},
     {'import_path': 'mainApp.AdaptadoresLogicos.UniqueUser'},
     {'import_path': 'mainApp.AdaptadoresLogicos.FallBack'},
-    {'import_path': 'mainApp.AdaptadoresLogicos.EditarCuentaEspejo'}
+    {'import_path': 'mainApp.AdaptadoresLogicos.EditarCuentaEspejo'},
+    {'import_path': 'mainApp.AdaptadoresLogicos.MirrorAccountSend'}
 ]  
 )
 
@@ -380,6 +425,7 @@ def send_to_api(apiReturn, data, select_id):
         Body:
         {prep.body}
         """
+        print(full_request)
         new_res = session.send(prep)
         if new_res.status_code == 200:
             return new_res.json()  
@@ -434,8 +480,10 @@ def CreateSubAccount(request):
                 Construct_name= f'DEV_{aglome}_{select_id}'
                 constr_name = {"name": Construct_name}
                 expire_add = {"expire": False}
+                
+                #Testeando envio de metodo post 
                 data = {
-                    "message": "create",
+                    "message": "request",
                     "data":{
                             "active": True,
                             "share_id": "",
@@ -447,6 +495,7 @@ def CreateSubAccount(request):
                             "imei": selected_imeis.split(',') if selected_imeis else []},
                     "key": "hashpartial"
                 }
+                
 
                 if selected_date == "" or selected_date == None:
                     data['data'].update(expire_add)
@@ -470,7 +519,7 @@ def CreateSubAccount(request):
             return JsonResponse({'error': 'Tu peticion no ha sido verificada, por favor contacta a soporte'}, status=401)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
-            
+    
 #FIX
 def EditSubAccount(request):
     if request.method == 'POST':

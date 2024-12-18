@@ -3,14 +3,18 @@ from django.conf import  settings
 from encrypted_model_fields.fields import EncryptedCharField
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from phonenumber_field.modelfields import PhoneNumberField
+
 
 class users_type(models.Model):
     NombreType = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.NombreType
+
 class CustomUser(AbstractUser):
     UserType = models.ForeignKey(users_type, on_delete=models.CASCADE, null=True)
-    phone_number = models.CharField(max_length=10,unique=True, blank=True, null=True, validators=[RegexValidator(
-    regex=r"^\d{10}", message="Phone number must be 10 digits only.")])
+    phone_number = PhoneNumberField(blank=True)
     address = models.TextField(max_length=50, null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
     otp = models.CharField(max_length=6, null=True, blank=True)
