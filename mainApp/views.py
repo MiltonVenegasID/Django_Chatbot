@@ -17,7 +17,7 @@ from .forms import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from nltk.sentiment.util import *
-from django.contrib.auth.mixins import  LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 import speech_recognition as sr
 import pyotp
 from datetime import datetime, timedelta
@@ -32,7 +32,7 @@ import hmac
 import hashlib
 import jwt
 import vertexai
-from vertexai.generative_model import GenerativeModel, Part, SafetySetting
+from vertexai.language_models import TextGenerationModel, SafetySetting
 
 stemmer = SnowballStemmer("spanish")
 lemmatizer = WordNetLemmatizer()
@@ -43,7 +43,7 @@ r = sr.Recognizer()
 openai.api_key = getattr(settings, "OPENAI_API_KEY", None)
 
 class CustomChatBot(ChatBot):
-   def get_response(self, input_statement, **kwargs):
+    def get_response(self, input_statement, **kwargs):
         if isinstance(input_statement, str):
             input_statement = self.storage.create(
                 text=input_statement,
@@ -69,27 +69,19 @@ class CustomChatBot(ChatBot):
     
 def generate(User_Input):
     vertexai.init(project="dev-atenea-1", location="us-central1")
-    model = GenerativeModel(
-        "gemini-exp-1206",
-        system_instruction=[textsi_1]
-    )
-    responses = model.generate_content(
-        [{User_Input}],
-        generation_config=generation_config,
-        safety_settings=safety_settings,
-        stream=True,
+    model = TextGenerationModel.from_pretrained("gemini-exp-1206")
+    responses = model.generate_text(
+        User_Input,
+        max_output_tokens=2048,
+        temperature=1,
+        top_p=1,
+        safety_settings=safety_settings
     )
 
     for response in responses:
         print(response.text, end="")
 
 textsi_1 = """Eres una inteligencia artificial enfocada en proveer los servicios de seguridad de transporte que la empresa provee"""
-
-generation_config = {
-    "max_output_tokens": 2048,
-    "temperature": 1,
-    "top_p": 1,
-}
 
 safety_settings = [
     SafetySetting(
@@ -110,6 +102,7 @@ safety_settings = [
     ),
 ]
 
+#Delete?
 def Chat_GPT(user_text):
 
     response = openai.ChatCompletion.create(
