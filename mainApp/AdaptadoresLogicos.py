@@ -248,9 +248,9 @@ class TakeMirrorAccounts(LogicAdapter):
                                         headers=headers)
                
                 if response.status_code == 200:
-                    #Ojito con el .content
-                    EditMA = response.json()
-                    print(EditMA)
+                    #Ojito con el content
+                    print(response.content)
+                    response.json()
                     
                     return f"La solicitud fue exitosa {response.status_code}"
                 else:
