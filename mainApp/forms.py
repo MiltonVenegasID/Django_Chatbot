@@ -7,6 +7,40 @@ from phonenumber_field.formfields import PhoneNumberField
 
 User = get_user_model()
 
+class CustomUserEditForm(forms.ModelForm):
+    username = forms.CharField(required=False, label='Usuario', strip=False, widget=forms.TextInput(attrs={'aria-label': 'Usuario', 'class': 'form-control'}))
+    email = forms.EmailField(required=False, label='Correo', widget=forms.EmailInput(attrs={'aria-label': 'Correo', 'class': 'form-control'}))
+    first_name = forms.CharField(required=False, label='Nombre', widget=forms.TextInput(attrs={'aria-label': 'Nombre', 'class': 'form-control'}))
+    last_name = forms.CharField(required=False, label='Apellidos', widget=forms.TextInput(attrs={'aria-label': 'Apellidos', 'class': 'form-control'}))
+    phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'placeholder': '', 'aria-label': 'Telefono', 'class': 'form-control'}), label=("Telefono"), required=False)
+    user_type = forms.ModelChoiceField(
+        queryset=users_type.objects.all(),
+        label='Tipo de Usuario',
+        to_field_name='id',
+        empty_label=None,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'phone_number', 'first_name', 'last_name', 'user_type']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if 'email' in self.cleaned_data:
+            user.email = self.cleaned_data['email']
+        if 'phone_number' in self.cleaned_data:
+            user.phone_number = self.cleaned_data['phone_number']
+        if 'first_name' in self.cleaned_data:
+            user.first_name = self.cleaned_data['first_name']
+        if 'last_name' in self.cleaned_data:
+            user.last_name = self.cleaned_data['last_name']
+        if 'user_type' in self.cleaned_data:
+            user.UserType = self.cleaned_data['user_type']
+        if commit:
+            user.save()
+        return user
 class CustomUserCreationForm(UserCreationForm):
     username = forms.CharField(required=True, label='Usuario', strip=False, widget=forms.TextInput(attrs={'aria-label': 'Usuario', 'class': 'form-control'}))
     email = forms.EmailField(required=True, label='Correo', widget=forms.EmailInput(attrs={'aria-label': 'Correo', 'class': 'form-control'}))

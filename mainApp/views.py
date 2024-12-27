@@ -32,7 +32,6 @@ import hmac
 import hashlib
 import jwt
 import vertexai
-from vertexai.language_models import TextGenerationModel, SafetySetting
 
 stemmer = SnowballStemmer("spanish")
 lemmatizer = WordNetLemmatizer()
@@ -62,45 +61,11 @@ class CustomChatBot(ChatBot):
                     break
         
         if response is None or response.confidence < 0.2:
-            fallback_response = generate(input_statement.text)
+            fallback_response = Chat_GPT(input_statement.text)
             response = fallback_response
         
         return response
     
-def generate(User_Input):
-    vertexai.init(project="dev-atenea-1", location="us-central1")
-    model = TextGenerationModel.from_pretrained("gemini-exp-1206")
-    responses = model.generate_text(
-        User_Input,
-        max_output_tokens=2048,
-        temperature=1,
-        top_p=1,
-        safety_settings=safety_settings
-    )
-
-    for response in responses:
-        print(response.text, end="")
-
-textsi_1 = """Eres una inteligencia artificial enfocada en proveer los servicios de seguridad de transporte que la empresa provee"""
-
-safety_settings = [
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-    ),
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-    ),
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-    ),
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold=SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-    ),
-]
 
 #Delete?
 def Chat_GPT(user_text):
@@ -138,7 +103,8 @@ chatbot = CustomChatBot('IRIS',
     {'import_path': 'mainApp.AdaptadoresLogicos.UniqueUser'},
     {'import_path': 'mainApp.AdaptadoresLogicos.FallBack'},
     {'import_path': 'mainApp.AdaptadoresLogicos.EditarCuentaEspejo'},
-    {'import_path': 'mainApp.AdaptadoresLogicos.MirrorAccountSend'}
+    {'import_path': 'mainApp.AdaptadoresLogicos.MirrorAccountSend'},
+    {'import_path': 'mainApp.AdaptadoresLogicos.TakeMirrorAccounts'},
 ]  
 )
 
@@ -157,23 +123,26 @@ class TextToSpeech:
         self.engine = pyttsx3.init()
         self.loop_running = False
         self.engine.setProperty('rate', self.engine.getProperty('rate') * 0.8)
-        self.engine.setProperty('volume', 0.0)
-
+        self.engine.setProperty('volume', 0.9)
+        
     def speak(self, text):
-        if not self.loop_running:
+        if self.loop_running:
+            self.engine.endLoop()
+            self.engine.stop()
+            self.loop_running = False
+        try:
+            self.engine.startLoop()
             self.loop_running = True
             self.engine.say(str(text))
             self.engine.runAndWait()
-        else:
-            raise RuntimeError("El loop ya ha comenzado")
+        except RuntimeError as e:
+            print(f"Error: {e}")
+        finally:
+            self.loop_running = False
             
     def speak_in_thread(self, text):
-        thread = threading.Thread(target=self.speak, args=(text))
-        self.loop_running = False
-        self.engine.stop()
+        thread = threading.Thread(target=self.speak, args=(text,))
         thread.start()
-        #TODO:
-        #FIXME:
 
 tts = TextToSpeech()
     
@@ -400,28 +369,15 @@ def send_to_api(apiReturn, data, select_id):
     jwt_token = create_jwt_token(select_id)
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'{jwt_token}' 
+        'Authorization': f'Bearer {jwt_token}' 
     }
-    
-    test = json.dumps(headers)
-    print(test)
     try:
-        response = requests.Request(method="POST", url=apiReturn, json=data, headers = headers)
-        session = requests.Session()
-        prep = response.prepare()
-        full_request = f"""
-        --- Prepared Request ---
-        URL: {prep.url}
-        Headers:
-        {prep.headers}
-        
-        Body:
-        {prep.body}
-        """
-        print(full_request)
-        new_res = session.send(prep)
-        if new_res.status_code == 200:
-            return new_res.json()  
+        print(headers)
+        response = requests.post(apiReturn, json=data, headers=headers)
+        if response.status_code == 200:
+            print(json.dumps(data))
+            print(response.content)
+            return response.json()  
         else:
             print(f"Request failed with status code {response.status_code}")
             print(f"Response text: {response.text}")
@@ -476,7 +432,7 @@ def CreateSubAccount(request):
                 
                 #Testeando envio de metodo post 
                 data = {
-                    "message": "request",
+                    "message": "create",
                     "data":{
                             "active": True,
                             "share_id": "",
@@ -495,7 +451,6 @@ def CreateSubAccount(request):
 
                 if selected_name == "" or selected_name == None:
                     data['data'].update(constr_name)
-
                 response = send_to_api(apiReturn, data, select_id)
                 if response is not None:
                     return JsonResponse({'response': 'Cuenta espejo creada con éxito'})
@@ -563,22 +518,33 @@ class Med(View):
         formR =  TestRegister(request.POST)
         if formR.is_valid():
             formR.save()
-            return redirect('index')
+            return redirect('Iris')
         else:
             return render(request, 'Inicio/lol.html', {'form': formR})
 
 
-class VistaRegistro(View):
+class VistaRegistro(LoginRequiredMixin, View):
     def get(self, request):
-        form = CustomUserCreationForm()  
-        return render(request, 'registro.html', {'form': form})
+        UserType = request.user.UserType_id
+        if UserType == 1:
+            form = CustomUserCreationForm()
+            editForm = CustomUserEditForm()
+            user_list = CustomUser.objects.all()
+            context = {
+                'UserList': user_list,
+                'form': form,
+                'editForm': editForm
+            }
+            return render(request, 'registro.html', context)
+        else:
+            return redirect('Iris')
 
     def post(self, request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)  
-            return redirect('index') 
+            return redirect('iris') 
         else:
             return render(request, 'registro.html', {'form': form})
     

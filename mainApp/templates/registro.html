@@ -7,30 +7,86 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/register.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'img/sky.png' %}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
-        integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/base-min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
-<body>
+<body id="RegisterBackground">
     <div class="container">
-        <div class="form-container">
+        <div class="form-containerNew">
+            <div class="TableTypeAssignament">
+                <button class="HeaderButtons" onclick="DisplayAddForm()">
+                    <i class="large material-icons">person_add</i>
+                </button>
+                <button class="HeaderButtons" onclick="DisplayEditForm()">
+                    <i class="large material-icons">create</i>
+                </button>
+                
+            </div>
             <form method="post" id="formRegister">
                 <h2 id="titleRegister">Registrar Usuario</h2>
                 {% csrf_token %}
                 <div class="pure-g">
-                    {% for field in form %}
-                    <div class="pure-u-1-3">
-                        <label for="" value="">{{ field.label }}:</label>
-                        {{ field }}
+                    <div class="pure-u-11-24">
+                        <label for="id_first_name" class="custom-label">{{ form.first_name.label }}:</label>
+                        {{ form.first_name }}
                     </div>
-                    {% endfor %}
+                    <div class="pure-u-11-24">
+                        <label for="id_last_name" class="custom-label">{{ form.last_name.label }}:</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="pure-u-1-1">
+                        <label for="id_email" class="custom-label">{{ form.email.label }}:</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="pure-u-11-24">
+                        <label for="id_username" class="custom-label">{{ form.username.label }}:</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="pure-u-11-24">
+                        <label for="id_phone_number" class="custom-label">{{ form.phone_number.label }}:</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="pure-u-1-1">
+                        <label for="id_password1" class="custom-label">{{ form.password1.label }}:</label>
+                        {{ form.password1 }}
+                    </div>
+                    <div class="pure-u-1-1">
+                        <label for="id_password2" class="custom-label">{{ form.password2.label }}:</label>
+                        {{ form.password2 }}
+                    </div>
+                    <div class="pure-u-1-1">
+                        <label for="id_user_type" class="custom-label">{{ form.user_type.label }}:</label>
+                        {{ form.user_type }}
+                    </div>
                 </div>
                 <div class="RegisterButton">
                     <button type="submit">Registrar</button>
                 </div>
             </form>
+            <div id="formEdit" style="display: none;">
+                <h2 id="titleRegister">Lista de usuarios</h2>
+                {% csrf_token %}
+                <div class="pure-g">
+                    <div class="ListUser">
+                        <div class="ListUserTable">
+                            <div class="pure-g">
+                                {% for user in UserList %}
+                                <div class="pure-u-1-1" id="ListaCuentasEspejo">
+                                    <p>{{ user.username }}</p>
+                                    <p>{{ user.email}}</p>
+                                    <i class="large material-icons IconShare">keyboard_arrow_right</i>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-</body>
-
-</html>
+        <script src="{% static 'js/Register.js' %}"></script>
+    </body>
+    
+    </html>

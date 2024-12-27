@@ -7,12 +7,14 @@ import pandas as pd
 import geocoder
 import json
 from Crypto.Hash import MD5
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 from django.conf import settings
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import jwt
+from django.http import HttpResponse
         
 
 
@@ -209,36 +211,90 @@ class TakeMirrorAccounts(LogicAdapter):
         self.request = request
         
     def can_process(self, statement):
-        words = ['ver cuentas espejo']
+        words = ['580']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):
+            
         user = self.request.user
-        # get_mirror_account = settings.GET_MIRROR_ACCOUNTS
-        # get_response = requests.get(get_mirror_account)
-        # get_response.raise_for_status()
-        # 
-        # get_data_api = get_response.json()   
-        # url = "https://atlantida2.mx/index.php?su=" + su.value; 
-        # if instance(get_data_api, list) and len(get_data_api) > 0:
-        # index = next((i for i, item in enumerate(get_data_api)
-        # if item.get('username') == user.username))
-        # else:
-        # html = "No se econtraron datos de tu cuenta"
-        # response_statement = Statement(text = html)
-        # response_statement.confidence = 1
-        # return response_statement
-        # if index !=1 :
-        # objects_get = get_data_api[index]
-        # name_imei = [obj.get('name') for obj in objects_get.get('objects', [])]
-        # imei_MA = [obj.get('imei') for obj in objects_get.get('objects', [])]
-        html = "Aqui tienes una lista de cuentas espejo activas actualmente"
-        html += "<ul>"
+        def generate_jwt(user_id, algorithm="HS256"):
+            payload = {
+                #Usar request en vez de user_id, tal vez si coloco la informacion del usuario una vez se logea
+                "message": "get", 
+                "data": {
+                    "user_id": user_id
+                }
+            }
+            token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
+            print(token)
+            return token
+        
+        def ReqMA():
+            data = {
+                "message": "get", 
+                "data": {
+                    "user_id": user_id
+                }
+            }
+            jwt_token = generate_jwt(user_id)
+            headers = {
+                "Authorization": f"Bearer {jwt_token}"
+            }
+            print(headers)
+            print(data)
+            try:
+                response = requests.post(get_mirror_account, 
+                                        json=data, 
+                                        headers=headers)
+               
+                if response.status_code == 200:
+                    #Ojito con el .content
+                    EditMA = response.json()
+                    print(EditMA)
+                    
+                    return f"La solicitud fue exitosa {response.status_code}"
+                else:
+                    print(f"Request failed with status code {response.status_code}")
+                    return "La solicitud no pudo concretarse"
+            except requests.exceptions.RequestException as e:
+                print(f"Occurrio un error: {e}")
+                return "Hubo un error en la solicitud"
+        
+        get_mirror_account = settings.API_SHARE
+        get_user = settings.GET_USER_OBJECTS
+        get_user += user.username
+        get_response = requests.get(get_user)
+        get_response.raise_for_status()
+        get_data_api = get_response.json()   
+        if isinstance(get_data_api, list) and len(get_data_api) > 0:
+            index = next((i for i, item in enumerate(get_data_api)
+            if item.get('username') == user.username))
+        else:
+            print("No existen datos que mostrar")
+        if index !=1 :
+            objects_get = get_data_api[index]
+            user_id = objects_get.get('user_id')
+            ReqMA()
+            text_html = 'La peticion se realizo con exito'
+        text_response = f"{text_html}"   
+        response_statement = Statement(text=text_response)
+        response_statement.confidence = 1
+        return response_statement
+        
+            
+            
+        
+        #html += """
+        #    <h1>Cuentas espejo activas</h1>
+        #    <tr> 
+        #    """
+        #for index, (name) in enumerate(zip(nameMA)):
+        #    html += f"<td>{name}</td>"
+        #html += "</tr>"
         
         # for index, (name, imei) in enumerate(zip(name_imei, imei_MA)):
         #     html += "<li>" + name + "</li>"
         
-        html += "</ul>"
         
         
 
@@ -256,17 +312,9 @@ class EditarCuentaEspejo(LogicAdapter):
     def process(self, input_statement, additional_response_selection_parameters=None, **kwargs):
         html = "Aqui esta una lista de las cuentas espejo activas actualmente, eligue las que desees modificar"
         html += """
-        <ul>
-        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
-        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
-        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
-        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
-        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
-        <li onclick="mostrarFormulario(event, 'Elemento 1')">Cuenta Espejo de ejemplo</li>
-        </ul>
+        <h1>Cuentas espejo activas</h1>
+        <tr> 
         """
-        
-        
         response_statement = Statement(text=html)
         response_statement.confidence = 1
         return response_statement
