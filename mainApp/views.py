@@ -352,31 +352,23 @@ class Iris(LoginRequiredMixin, View):
         else:
             return PermissionDenied()
 
-def create_jwt_token(select_id, algorithm="HS256"):
-    payload = {
-        #Usar request en vez de user_id, tal vez si coloco la informacion del usuario una vez se logea
-        "user_id": select_id,
-        "exp": datetime.now() + timedelta(hours = 1),
-        "iat": datetime.now()
-    }
+def create_jwt_token(select_id, data, algorithm="HS256"):
+    payload = data
+    print(data)
     #secret_key = settings from php
     #TODO
     token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
-    print(token)
     return token
 
 def send_to_api(apiReturn, data, select_id):
-    jwt_token = create_jwt_token(select_id)
+    jwt_token = create_jwt_token(select_id, data)
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {jwt_token}' 
     }
     try:
-        print(headers)
         response = requests.post(apiReturn, json=data, headers=headers)
         if response.status_code == 200:
-            print(json.dumps(data))
-            print(response.content)
             return response.json()  
         else:
             print(f"Request failed with status code {response.status_code}")
@@ -396,8 +388,6 @@ def verify_api_token(func):
         if not stored_token:
             return JsonResponse({'error': 'Invalid session'}, status=401)
         
-        signature = hmac.new(settings.SECRET_KEY.encode(), stored_token.encode(), hashlib.sha256).hexdigest()
-        print(signature)
         return func(request, *args, **kwargs)
     return wrapper
 

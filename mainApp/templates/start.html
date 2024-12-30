@@ -37,11 +37,11 @@
             <h2 class="InicioSesionTitulo">Login</h2>
             {% if not request.user.is_authenticated %}
             <div class="method">
-                <form method="post">
+                <form method="post" id="myForm">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <div class="NEO">
-                        <button type="submit" class="ButtonLog">Login</button>
+                        <button id="submit-btn" class="ButtonLog">Login</button>
                     </div>
                 </form>
             </div>
@@ -278,7 +278,13 @@
         </div>
     </div>
 
-    <script src="{% static 'js/Init.js' %}" async></script>
+    <script src="{% static 'js/Init.js' %}" async>
+
+        $('#submit-btn').on('click', function (event) {
+            event.preventDefault();
+            $('#myForm').submit();
+        });
+    </script>
 </body>
 
 </html>

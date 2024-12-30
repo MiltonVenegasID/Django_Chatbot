@@ -111,6 +111,7 @@ class CuentaEspejo(LogicAdapter):
         object_response = requests.get(get_user_objects)
         object_response.raise_for_status()
         object_data_api = object_response.json()
+        print(object_data_api)
         if isinstance(object_data_api, list) and len(object_data_api) > 0:
             index_object = next((i for i, item in enumerate(object_data_api)
                         if item.get('username') == user.username and 
@@ -226,40 +227,9 @@ class TakeMirrorAccounts(LogicAdapter):
                 }
             }
             token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
-            print(token)
             return token
         
-        def ReqMA():
-            data = {
-                "message": "get", 
-                "data": {
-                    "user_id": user_id
-                }
-            }
-            jwt_token = generate_jwt(user_id)
-            headers = {
-                "Authorization": f"Bearer {jwt_token}"
-            }
-            print(headers)
-            print(data)
-            try:
-                response = requests.post(get_mirror_account, 
-                                        json=data, 
-                                        headers=headers)
-               
-                if response.status_code == 200:
-                    #Ojito con el content
-                    print(response.content)
-                    response.json()
-                    
-                    return f"La solicitud fue exitosa {response.status_code}"
-                else:
-                    print(f"Request failed with status code {response.status_code}")
-                    return "La solicitud no pudo concretarse"
-            except requests.exceptions.RequestException as e:
-                print(f"Occurrio un error: {e}")
-                return "Hubo un error en la solicitud"
-        
+        response_statement = "La solicitud no pudo concretarse"
         get_mirror_account = settings.API_SHARE
         get_user = settings.GET_USER_OBJECTS
         get_user += user.username
@@ -270,16 +240,65 @@ class TakeMirrorAccounts(LogicAdapter):
             index = next((i for i, item in enumerate(get_data_api)
             if item.get('username') == user.username))
         else:
+            response_element = "No se tienen datos registrados de tu cuenta"
             print("No existen datos que mostrar")
         if index !=1 :
             objects_get = get_data_api[index]
             user_id = objects_get.get('user_id')
-            ReqMA()
-            text_html = 'La peticion se realizo con exito'
-        text_response = f"{text_html}"   
-        response_statement = Statement(text=text_response)
+        data = {
+            "message":"get", 
+            "data": {
+                "user_id": user_id
+            }
+        }
+        jwt_token = generate_jwt(user_id)
+        headers = {
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        response = requests.post(get_mirror_account, 
+                                json=data, 
+                                headers=headers)
+        
+        if response.status_code == 200:
+            #Ojito con el content
+            try:
+                response.raise_for_status()
+                response_statement = response.json()
+                if response_statement is None:
+                    response_element = "No se encontraron datos de tu cuenta"
+                else:
+                    response_element = "Aqui tienes la informacion referente al array"
+                    response_element = "<br>"
+                    get_name = [item['name'] for item in response_statement.get('data', [])]
+                    get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
+                    get_expire_dt = [item['expire_dt'] for item in response_statement.get('data', [])]
+                    response_statement = """
+                    <div class"pure-g">
+                        <div class="pure-u-1-1">
+                        <div class="pure-u-7-24">Id</div>
+                        <div class="pure-u-7-24">Nombre</div>
+                        <div class="pure-u-7-24">Fecha de Expiracion</div>
+                    </div
+                    """
+                    for share_id, name, expire_dt in zip(get_share_id, get_name, get_expire_dt):
+                        response_element += f"""
+                            <div class="pure-g" id="referenceTake">
+                                <div class="pure-u-7-24">{share_id}</div>
+                                <div class="pure-u-7-24">{name}</div>
+                                <div class="pure-u-7-24">{expire_dt}</div>
+                            </div>
+                        """
+                    
+            except (json.decoder.JSONDecodeError, ValueError) as e:
+                print(f"Error: {e}")
+        else:
+            print(f"Request failed with status code {response.status_code}")
+        
+        response_statement = Statement(text = response_element)
         response_statement.confidence = 1
         return response_statement
+        
+        
         
             
             

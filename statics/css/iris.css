@@ -453,3 +453,16 @@ div.msg-box span.btn-group i {
     color: inherit;
     content: '\025B4';
  }
+
+#referenceTake{
+    padding: 1%;
+    background-color: blue;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+.pure-u-7-24{
+    padding: 1%;
+}
