@@ -63,11 +63,19 @@
             <div class="dot-spinner__dot"></div>
         </div>
     </div>
-    </div>
+</div>
 </body>
 
 <script src="{% static 'js/chat.js' %}"></script>
 <script>
+
+    function displayForm(row) {
+        var formRow = row.nextElementSibling;
+        if (formRow && formRow.classList.contains('form-row')) {
+            formRow.style.display = formRow.style.display === 'none' ? 'table-row' : 'none';
+        }
+    }
+    
     async function sendMessage(message = null) {
         const userMessage = message || document.getElementById('newUserInput').value;
         const chatLog = document.getElementById('chatLog');
@@ -211,8 +219,8 @@
     function EditMirrorAccount(event) {
         event.preventDefault();
 
-        const button = document.querySelector("button[onclick='EditMirrorAccount()']");
-        const form = document.getElementById('editMirrorAccountForm');
+        const button = event.target;
+        const form = button.closest('form');
         const formData = new FormData(form);
 
         const data = {};
@@ -220,8 +228,21 @@
             data[key] = value;
         });
 
-        //Need to add some functions here for every data label that is picked, maybe if i use another fetch?
+        const Imei = [];
+        const checkboxes = form.querySelectorAll('input[name="Imei"]');
+
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                Imei.push(checkbox.value);
+            }
+        });
+
+        if (Imei.length > 0) {
+            data['Imei'] = Imei.join(',');
+        }
+
         fetch('EditSubAccount', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
@@ -241,6 +262,32 @@
             .finally(() => {
                 button.disabled = false;
             });
+    }
+
+    function DeleteMirrorAccount(event){
+        event.preventDefault();
+        const button = event.target;
+        const form = button.closest('form');
+        const formData = new FormData(form);
+
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+        fetch('DeleteSubAccount', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+                },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+            .then(data => {
+                const chatLog = document.getElementById('chatLog');
+                    chatLog.innerHTML += `<div class="logs" id="Bot">La cuenta espejo fue editada exitosamente</div>`;
+            })
+        
     }
 
     var $rows = $('#TableForMA tbody tr');

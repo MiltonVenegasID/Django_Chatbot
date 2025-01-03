@@ -153,7 +153,7 @@ a[type="button"]{
     width: 60%;
 }
 
-#mirrorAccountForm {
+#mirrorAccountForm, #EditMirrorAccountForm {
     display: grid;
     margin-top: 2%;
 }
@@ -453,6 +453,11 @@ div.msg-box span.btn-group i {
     color: inherit;
     content: '\025B4';
  }
+
+.tableContainer{
+    max-height: 400px;
+    overflow-y: auto;
+}
 
 #referenceTake{
     padding: 1%;

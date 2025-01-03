@@ -308,7 +308,6 @@ class OTPView(View):
         if request.session.get('logged_in_via_login_view') and request.session.get('username'):
             form = OTPForm(request.POST or None)
             otp = request.session.get('otp')
-            print(otp)
             return render(request, 'OTP.html', {'form': form, 'error_message': error_message})
         elif not request.session.get('username'):
             return redirect('index')
@@ -369,6 +368,7 @@ def send_to_api(apiReturn, data, select_id):
     try:
         response = requests.post(apiReturn, json=data, headers=headers)
         if response.status_code == 200:
+            print(response.content)
             return response.json()  
         else:
             print(f"Request failed with status code {response.status_code}")
@@ -435,7 +435,7 @@ def CreateSubAccount(request):
                     "key": "hashpartial"
                 }
                 
-
+                print(data)
                 if selected_date == "" or selected_date == None:
                     data['data'].update(expire_add)
 
@@ -461,6 +461,7 @@ def CreateSubAccount(request):
 #FIX
 def EditSubAccount(request):
     if request.method == 'POST':
+        token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
         get_user = settings.GET_USER_OBJECTS
         get_user += request.user.username
         req_response = requests.get(get_user)
@@ -473,18 +474,97 @@ def EditSubAccount(request):
                 user_id = req_data[index]
                 select_id = user_id.get('user_id')
                 
-                active_mirror_accounts = []  
-                for account in req_data:
-                    if account.get('active'): 
-                        active_mirror_accounts.append({
-                            'share_id': account.get('share_id'),
-                            'selected_name': account.get('selected_name'),
-                        })
-                
-                return JsonResponse({'Cuentas espejo activas': active_mirror_accounts})
-        
+            try:
+                data = json.loads(request.body)
+                selected_imeis = data.get('Imei', '')
+                if len(selected_imeis) > 0:
+                    selected_share_id = data.get('share_id')
+                    selected_su = data.get('su')
+                    apiReturn = settings.API_SHARE
+                    formData = {key: value for key, value in data.items() if key != 'Imei'}
+                    data['token'] = token
+                    request.session['api_token'] = token
+                    data = {
+                        "message":"create",
+                        "data": {
+                            "active": True,
+                            "share_id": selected_share_id,
+                            "email": "",
+                            "phone": "",
+                            "expire": True,
+                            **formData,
+                            "imei": selected_imeis.split(',') if selected_imeis else [],
+                        },
+                        "key": "hashpartial"
+                    }
+                    print(data)
+                    response = send_to_api(apiReturn, data, select_id )   
+                    if response is not None:
+                        return JsonResponse({'response': 'Las cuentas espejo fueron editadas'})
+            except Exception as e:
+                return JsonResponse({'error': 'Tu peticion no ha sido verificada, por favor'})
         return JsonResponse({'error': 'No se encontraron cuentas espejo activas'}, status=404)
-
+def DeleteSubAccount(request):
+    if request.method == 'POST':
+        token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
+        get_mirror_account = settings.API_SHARE
+        get_user = settings.GET_USER_OBJECTS
+        get_user += request.user.username
+        req_response = requests.get(get_user)
+        req_data = req_response.json()
+        if isinstance(req_data, list) and len(req_data) > 0:
+            index = next((i for i, item in enumerate (req_data) if item['username'] == request.user.username), None)
+        if index != -1:
+            user_id = req_data[index]
+            select_id = user_id.get('user_id')
+        data = {
+            "message": "get",
+            "data": {
+                "user_id":select_id
+            }
+        }
+        jwt_token = create_jwt_token(select_id)
+        headers = {
+            "Authorization": f"Bearer {jwt_token}"
+        }
+        
+        response = request.post(get_mirror_account, json=data, headers=headers)
+        if response.status_code == 200:
+            try:
+                response.raise_for_status()
+                response_statement = response.json()
+                get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
+                get_imei = [item['imei'] for item in response_statement.get('data', [])]
+            except (json.decoder.JSONDecodeError, ValueError) as e:
+                print(f"Error: {e}")   
+                
+        
+        try:
+            data = json.loads(request.body)
+            apiReturn = settings.API_SHARE
+            data['token'] = token
+            request.session['api_token'] = token
+            selected_share_id = data.get('share_id', '')
+            imei = get_imei if selected_share_id in get_share_id else ""
+            data = {
+                    "message": "create",
+                    "data":{
+                            "active": False,
+                            "share_id": selected_share_id,
+                            "user_id": select_id,
+                            "email": "",
+                            "phone": "",
+                            "expire": True,
+                            "imei": imei},
+                    "key": "hashpartial"
+                }
+            print(data)
+            #response = send_to_api(apiReturn, data, select_id )   
+            #if response is not None:
+            #    return JsonResponse({'response': 'Las cuentas espejo fueron editadas'})
+        except Exception as e:
+            return JsonResponse({'error': 'Tu peticion no ha sido verificada, por favor'})
+            
 def LinkSubAccount(request):
     endpoint = "https://atlantida2.mx/index.php?su="
     if request.method == 'POST':

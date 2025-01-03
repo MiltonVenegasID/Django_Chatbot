@@ -135,9 +135,7 @@ class CuentaEspejo(LogicAdapter):
         Agglomerated_string = root_url +  forced_string + transformed_hash
         html_Conj = "Para poder entregar un acceso a tu cuenta espejo, por favor llena el siguiente formulario \n"
         html_Conj += "<form id='mirrorAccountForm'>"
-        html_Conj += f'''
-        '''
-        table_html = '<div style="max-height: 400px; overflow-y: auto;">'
+        table_html = '<div class="tableContainer">'
         table_html += '<div style="position: relative;"><input id="SearchTable" type="text" onkeyup="Searcher()"><i class="medium material-icons" id="SearchIcon">search</i></div>'
         table_html += '<table class="sortable" id="TableForMA">'
         table_html += '<thead><tr><th id="add_sr">Añadir</th><th>Nombre</th><th>IMEI</th></tr></thead>'
@@ -245,6 +243,8 @@ class TakeMirrorAccounts(LogicAdapter):
         if index !=1 :
             objects_get = get_data_api[index]
             user_id = objects_get.get('user_id')
+            nameImei = [obj.get('name') for obj in objects_get.get('objects', [])]
+            Imei = [obj.get('imei') for obj in objects_get.get('objects', [])]
         data = {
             "message":"get", 
             "data": {
@@ -267,27 +267,82 @@ class TakeMirrorAccounts(LogicAdapter):
                 if response_statement is None:
                     response_element = "No se encontraron datos de tu cuenta"
                 else:
-                    response_element = "Aqui tienes la informacion referente al array"
-                    response_element = "<br>"
-                    get_name = [item['name'] for item in response_statement.get('data', [])]
+                    response_element = "Aqui tienes una lista de cuentas espejo asociadas a tu cuenta"
+                    response_element += "<br>"
                     get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
+                    imei_share_id = {item['share_id']: item['imei'] for item in response_statement.get('data', []) if item['active'] == 'true'}
+                    get_name = [item['name'] for item in response_statement.get('data', [])]
                     get_expire_dt = [item['expire_dt'] for item in response_statement.get('data', [])]
-                    response_statement = """
-                    <div class"pure-g">
-                        <div class="pure-u-1-1">
-                        <div class="pure-u-7-24">Id</div>
-                        <div class="pure-u-7-24">Nombre</div>
-                        <div class="pure-u-7-24">Fecha de Expiracion</div>
-                    </div
+                    get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
+                    get_su = [item['su'] for item in response_statement.get('data', [])]
+                    response_element += """
+                        <div class="tableContainer">
+                            <div id="SearchTable" type="text"></div>
+                            <table class="sortable">
+                            <thead id="selected">
+                                <tr>
+                                    <th>Numero</th>
+                                    <th>Nombre</th>
+                                    <th>Fecha</th>
+                                </tr> 
+                            </thead>
+                            <tbody id="TableCreateMa">
                     """
-                    for share_id, name, expire_dt in zip(get_share_id, get_name, get_expire_dt):
+                    for idx, (name, expire_dt, share_id, su) in enumerate(zip(get_name, get_expire_dt, get_share_id, get_su), start=1):
                         response_element += f"""
-                            <div class="pure-g" id="referenceTake">
-                                <div class="pure-u-7-24">{share_id}</div>
-                                <div class="pure-u-7-24">{name}</div>
-                                <div class="pure-u-7-24">{expire_dt}</div>
-                            </div>
+                            <tr onclick="displayForm(this)">
+                                <td><p>{idx}</p></td>
+                                <td><p>{name}</p></td>
+                                <td><p>{expire_dt}</p></td>
+                            </tr>
+                            <tr class="form-row" style="display:none;">
+                                <td colspan="3">
+                                    <div class="tableContainer">
+                                    <form id="TestingEdit">
+                                        <input type="hidden" name="su" value="{su}">
+                                        <input type="hidden" name="share_id" value="{share_id}">
+                                        <table class="sortable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Seleccionar</th>
+                                                    <th>Nombre</th>
+                                                    <th>IMEI</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            """
+                        imei_for_idx = imei_share_id.get(get_share_id[idx-1], [])
+                        for name, imei in zip(nameImei, Imei):
+                            checked_attribute = 'checked' if imei in imei_for_idx else ''
+                            response_element += f"""
+                                                    <tr>
+                                                        <td><input type="checkbox" name="Imei" class="check" value="{imei}" {checked_attribute}></td>
+                                                        <td class="middleTd"><p>{name}</p></td>
+                                                        <td><p>{imei}</p></td>
+                                                    </tr>
+                                                """
+                        response_element += """
+                                            </tbody>
+                                        </table>
+                                        <br>
+                                    <label for="expire_dt">Fecha de expiracion</label>
+                                    <input type="date" id="expire_dt" name="expire_dt">
+                                    <br>
+                                    <label for="name">Nombre</label>
+                                    <input type="text" id="name" name="name">
+                                    <br>
+                                    <button type="submit" onclick="EditMirrorAccount(event)">Editar</button>
+                                    <button type="button" class="button-error" onclick="DeleteMirrorAccount(event)">Eliminar</button>
+                                    </form>
+                                    </div>
+                                </td>
+                            </tr>
                         """
+                    response_element += """
+                            </tbody>
+                    </table>
+                    </div>
+                    """
                     
             except (json.decoder.JSONDecodeError, ValueError) as e:
                 print(f"Error: {e}")
