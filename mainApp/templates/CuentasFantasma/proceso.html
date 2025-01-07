@@ -72,7 +72,7 @@
     function displayForm(row) {
         var formRow = row.nextElementSibling;
         if (formRow && formRow.classList.contains('form-row')) {
-            formRow.style.display = formRow.style.display === 'none' ? 'table-row' : 'none';
+            formRow.style.display = formRow.style.display === 'none' ? 'grid' : 'none';
         }
     }
     
@@ -264,30 +264,34 @@
             });
     }
 
-    function DeleteMirrorAccount(event){
-        event.preventDefault();
-        const button = event.target;
-        const form = button.closest('form');
-        const formData = new FormData(form);
+    function ToggleSwitch(element){
+        const toggleButton = element.value;
+        const data = {}
 
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-        fetch('DeleteSubAccount', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
+        data['key']=toggleButton;
+        
+        if(element.checked){
+            data['rep'] = true;
+            console.log("Informacion checada");
+        }
+        else{
+            data['rep'] = false;
+            console.log("Informacion no checada");
+        }
+            fetch('ToggleSubAccount', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
             .then(data => {
                 const chatLog = document.getElementById('chatLog');
-                    chatLog.innerHTML += `<div class="logs" id="Bot">La cuenta espejo fue editada exitosamente</div>`;
+                chatLog.innerHTML += `<div class="logs" id="Bot">Tu cuenta espejo ha sido modificada</div>`
             })
-        
+       
     }
 
     var $rows = $('#TableForMA tbody tr');

@@ -16,6 +16,5 @@ urlpatterns = [
     path('Test', Med.as_view(), name=  'Test'),
     path('CreateSubAccount', CreateSubAccount, name='CreateSubAccount'),
     path('EditSubAccount', EditSubAccount, name="EditSubAccount"),
-    path('DeleteSubAccount', DeleteSubAccount, name="DeleteSubAccount"),
-    
+    path('ToggleSubAccount', ToggleSubAccount, name="ToggleSubAccount"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

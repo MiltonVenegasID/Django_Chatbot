@@ -353,7 +353,6 @@ class Iris(LoginRequiredMixin, View):
 
 def create_jwt_token(select_id, data, algorithm="HS256"):
     payload = data
-    print(data)
     #secret_key = settings from php
     #TODO
     token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm=algorithm)
@@ -368,7 +367,6 @@ def send_to_api(apiReturn, data, select_id):
     try:
         response = requests.post(apiReturn, json=data, headers=headers)
         if response.status_code == 200:
-            print(response.content)
             return response.json()  
         else:
             print(f"Request failed with status code {response.status_code}")
@@ -434,8 +432,6 @@ def CreateSubAccount(request):
                             "imei": selected_imeis.split(',') if selected_imeis else []},
                     "key": "hashpartial"
                 }
-                
-                print(data)
                 if selected_date == "" or selected_date == None:
                     data['data'].update(expire_add)
 
@@ -460,6 +456,7 @@ def CreateSubAccount(request):
     
 #FIX
 def EditSubAccount(request):
+    #checar esto, puede optimizarse 
     if request.method == 'POST':
         token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
         get_user = settings.GET_USER_OBJECTS
@@ -475,15 +472,21 @@ def EditSubAccount(request):
                 select_id = user_id.get('user_id')
                 
             try:
+                Imei = [obj.get('imei') for obj in user_id.get('objects', [])]
                 data = json.loads(request.body)
                 selected_imeis = data.get('Imei', '')
+                selected_imeis_list = selected_imeis.split(',') if selected_imeis else []
+                valid_selected_imeis = [imei for imei in selected_imeis_list if imei in Imei]
+
                 if len(selected_imeis) > 0:
                     selected_share_id = data.get('share_id')
                     selected_su = data.get('su')
                     apiReturn = settings.API_SHARE
-                    formData = {key: value for key, value in data.items() if key != 'Imei'}
-                    data['token'] = token
-                    request.session['api_token'] = token
+                    if valid_selected_imeis:
+                        formData = {key: value for key, value in data.items() if key != 'Imei'}
+                        data['token'] = token
+                        request.session['api_token'] = token
+                    
                     data = {
                         "message":"create",
                         "data": {
@@ -493,7 +496,7 @@ def EditSubAccount(request):
                             "phone": "",
                             "expire": True,
                             **formData,
-                            "imei": selected_imeis.split(',') if selected_imeis else [],
+                            "imei": valid_selected_imeis,
                         },
                         "key": "hashpartial"
                     }
@@ -504,67 +507,71 @@ def EditSubAccount(request):
             except Exception as e:
                 return JsonResponse({'error': 'Tu peticion no ha sido verificada, por favor'})
         return JsonResponse({'error': 'No se encontraron cuentas espejo activas'}, status=404)
-def DeleteSubAccount(request):
+                                 
+def ToggleSubAccount(request):
     if request.method == 'POST':
-        token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
-        get_mirror_account = settings.API_SHARE
-        get_user = settings.GET_USER_OBJECTS
-        get_user += request.user.username
-        req_response = requests.get(get_user)
-        req_data = req_response.json()
-        if isinstance(req_data, list) and len(req_data) > 0:
-            index = next((i for i, item in enumerate (req_data) if item['username'] == request.user.username), None)
-        if index != -1:
-            user_id = req_data[index]
-            select_id = user_id.get('user_id')
-        data = {
-            "message": "get",
-            "data": {
-                "user_id":select_id
-            }
-        }
-        jwt_token = create_jwt_token(select_id)
-        headers = {
-            "Authorization": f"Bearer {jwt_token}"
-        }
-        
-        response = request.post(get_mirror_account, json=data, headers=headers)
-        if response.status_code == 200:
-            try:
-                response.raise_for_status()
-                response_statement = response.json()
-                get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
-                get_imei = [item['imei'] for item in response_statement.get('data', [])]
-            except (json.decoder.JSONDecodeError, ValueError) as e:
-                print(f"Error: {e}")   
-                
-        
         try:
             data = json.loads(request.body)
-            apiReturn = settings.API_SHARE
-            data['token'] = token
-            request.session['api_token'] = token
-            selected_share_id = data.get('share_id', '')
-            imei = get_imei if selected_share_id in get_share_id else ""
-            data = {
-                    "message": "create",
-                    "data":{
-                            "active": False,
-                            "share_id": selected_share_id,
-                            "user_id": select_id,
-                            "email": "",
-                            "phone": "",
-                            "expire": True,
-                            "imei": imei},
+            selected_share_id = data.get('key')
+            selected_active_value = data.get('rep')
+            token = base64.b64encode(settings.SECRET_KEY.encode()).decode()
+            get_user = settings.GET_USER_OBJECTS
+            get_user += request.user.username
+            req_response = requests.get(get_user)
+            req_data = req_response.json()
+            
+            if isinstance(req_data, list) and len(req_data) > 0:
+                index = next((i for i, item in enumerate(req_data) if item['username'] == request.user.username), None)
+                if index is not None:
+                    user_id = req_data[index]
+                    select_id = user_id.get('user_id')
+                
+                apiReturn = settings.API_SHARE
+                get_method = {
+                    "message": "get",
+                    "data": {
+                        "user_id": select_id,
+                    }
+                }
+                jwt_token = create_jwt_token(select_id, get_method)
+                headers = {
+                    "Authorization": f"Bearer {jwt_token}"
+                }
+
+                response = requests.post(apiReturn, json=data, headers=headers)
+                response.raise_for_status()
+                from_get_users = response.json()
+                Su_api = ''.join([item['su'] for item in from_get_users.get('data', []) if item['share_id'] == selected_share_id])
+                name_api = ''.join([item['name'] for item in from_get_users.get('data', []) if item['share_id'] == selected_share_id])
+                expire_api = ''.join([item['expire_dt'] for item in from_get_users.get('data', []) if item['share_id'] == selected_share_id])
+                imei_Api_share = [imei.strip() for item in from_get_users.get('data', []) 
+                  if item['share_id'] == selected_share_id 
+                  for imei in item['imei'].split(',')]
+                data = {
+                    "message":"create",
+                    "data": {
+                        "active": selected_active_value,
+                        "share_id": selected_share_id,
+                        "email": "",
+                        "phone": "",
+                        "expire": True,
+                        "su": Su_api,
+                        "expire_dt": expire_api,
+                        "name": name_api,
+                        "imei": imei_Api_share
+                    },
                     "key": "hashpartial"
                 }
-            print(data)
-            #response = send_to_api(apiReturn, data, select_id )   
-            #if response is not None:
-            #    return JsonResponse({'response': 'Las cuentas espejo fueron editadas'})
+                print(data)
+                response = send_to_api(apiReturn, data, select_id)
+                if response is not None:
+                    return JsonResponse({'response': 'La eliminacion fue exitosa'}, status=400)   
+                else:
+                    return JsonResponse({'response': 'La eliminacion no fue exitosa'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': 'Tu peticion no ha sido verificada, por favor'})
-            
+            return JsonResponse({'error': 'Invalid data or server error'}, status=400)
+        
+       
 def LinkSubAccount(request):
     endpoint = "https://atlantida2.mx/index.php?su="
     if request.method == 'POST':
@@ -611,10 +618,15 @@ class VistaRegistro(LoginRequiredMixin, View):
 
     def post(self, request):
         form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  
-            return redirect('iris') 
-        else:
+        try:
+            if form.is_valid():
+                user = form.save()
+                login(request, user)  
+                return redirect('Iris') 
+            else:
+                print("Form errors:", form.errors)
+                return render(request, 'registro.html', {'form': form})
+        except Exception as e:
+            print(f"Error while processing form: {e}")
             return render(request, 'registro.html', {'form': form})
-    
+

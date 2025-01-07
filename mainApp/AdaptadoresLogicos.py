@@ -267,33 +267,60 @@ class TakeMirrorAccounts(LogicAdapter):
                 if response_statement is None:
                     response_element = "No se encontraron datos de tu cuenta"
                 else:
+                    today = datetime.today()
                     response_element = "Aqui tienes una lista de cuentas espejo asociadas a tu cuenta"
                     response_element += "<br>"
                     get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
                     imei_share_id = {item['share_id']: item['imei'] for item in response_statement.get('data', []) if item['active'] == 'true'}
                     get_name = [item['name'] for item in response_statement.get('data', [])]
                     get_expire_dt = [item['expire_dt'] for item in response_statement.get('data', [])]
+                    print(get_expire_dt)
+                    expire_dt = []
+                    for item in get_expire_dt:
+                        try:
+                            expire_dt.append(datetime.strptime(item, '%Y-%m-%d') - today)
+                        except:
+                            expire_dt.append(today)
+                    #for item in get_expire_dt:
+                    #    try:
+                    #        expire_dt = [datetime.strptime(item, '%Y-%m-%d') - today]
+                    #        print(expire_dt)
+                    #    except:
+                    #        expire_dt = today - timedelta(days=1)
+                    print(expire_dt)                        
+                    get_active_state = [item['active'] for item in response_statement.get('data', [])] 
                     get_share_id = [item['share_id'] for item in response_statement.get('data', [])]
                     get_su = [item['su'] for item in response_statement.get('data', [])]
+                    
                     response_element += """
                         <div class="tableContainer">
                             <div id="SearchTable" type="text"></div>
                             <table class="sortable">
                             <thead id="selected">
                                 <tr>
-                                    <th>Numero</th>
-                                    <th>Nombre</th>
-                                    <th>Fecha</th>
+                                    <th style="width: 10%;">Numero</th>
+                                    <th style="width: 40%;">Nombre</th>
+                                    <th style="width: 20%;">Fecha</th>
+                                    <th style="width: 20%;">Activo</th>
+                                    <th style="width: 10%;"></th>
                                 </tr> 
                             </thead>
                             <tbody id="TableCreateMa">
                     """
-                    for idx, (name, expire_dt, share_id, su) in enumerate(zip(get_name, get_expire_dt, get_share_id, get_su), start=1):
+                    for idx, (name, expire_dt, share_id, su, active_state) in enumerate(zip(get_name, expire_dt, get_share_id, get_su, get_active_state), start=1):
+                        checked_attribute = 'checked' if active_state == 'true' else ''
                         response_element += f"""
                             <tr onclick="displayForm(this)">
-                                <td><p>{idx}</p></td>
-                                <td><p>{name}</p></td>
-                                <td><p>{expire_dt}</p></td>
+                                <td style="width: 10%;"><p>{idx}</p></td>
+                                <td style="width: 40%;"><p>{name}</p></td>
+                                <td style="width: 20%;"><p>{expire_dt.days}</p></td>
+                                <td>
+                                    <label class="switch">
+                                        <input type="checkbox" value="{share_id}" onclick="ToggleSwitch(this)" {checked_attribute}></input>
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td><i class="large material-icons">chevron_right</i></td>
                             </tr>
                             <tr class="form-row" style="display:none;">
                                 <td colspan="3">
@@ -332,7 +359,6 @@ class TakeMirrorAccounts(LogicAdapter):
                                     <input type="text" id="name" name="name">
                                     <br>
                                     <button type="submit" onclick="EditMirrorAccount(event)">Editar</button>
-                                    <button type="button" class="button-error" onclick="DeleteMirrorAccount(event)">Eliminar</button>
                                     </form>
                                     </div>
                                 </td>

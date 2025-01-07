@@ -186,6 +186,10 @@ a[type="button"]{
     transform-origin: center center;
 }
 
+.form-row{
+    display: grid;
+}
+
 .check:checked {
     animation: a .3s ease-in forwards;
     background-color: rgb(120, 190, 120);
@@ -468,6 +472,60 @@ div.msg-box span.btn-group i {
     margin-bottom: 2%;
 }
 
+.switch {
+    font-size: 80%;
+    position: relative;
+    display: inline-block;
+    width: 58px;
+    height: 30px;
+}
+
+.switch input {
+    opacity: 1;
+    width: 0;
+    height: 0;
+}
+
+thead, tbody{
+    display: table-header-group;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    background: #aaa;
+    transition: .4s;
+    border-radius: 30px;
+    border: 1px solid #000000;
+   }
+   
+   .slider:before {
+    position: absolute;
+    content: "";
+    height: 1.9em;
+    width: 1.9em;
+    border-radius: 16px;
+    left: 1.2px;
+    top: 0;
+    bottom: 0;
+    background-color: white;
+    box-shadow: 0 2px 5px #999999;
+    transition: .4s;
+   }
+   
+   input:checked + .slider {
+    background-color: #118bee;
+    border: 1px solid transparent;
+   }
+   
+   input:checked + .slider:before {
+    transform: translateX(2.5em);
+   }
+   
 .pure-u-7-24{
     padding: 1%;
 }
