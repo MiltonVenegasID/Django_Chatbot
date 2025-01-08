@@ -85,7 +85,7 @@ class InformacionUsuario(LogicAdapter):
 class CuentaEspejo(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
-        self.keywords = np.array(['Realizar cuenta espejo', 'Solicitud de cuentas espejo'])
+        self.keywords = np.array(['Realizar cuenta espejo', 'Solicitud de cuentas espejo', 'quiero ver mi cuenta espejo', 'quiero revisar mi cuenta espejo', 'ver cuenta espejo'])
         
     def set_request(self, request):
         self.request = request
@@ -114,8 +114,7 @@ class CuentaEspejo(LogicAdapter):
         print(object_data_api)
         if isinstance(object_data_api, list) and len(object_data_api) > 0:
             index_object = next((i for i, item in enumerate(object_data_api)
-                        if item.get('username') == user.username and 
-                           item.get('email') ==  user.email))
+                        if item.get('username') == user.username))
         else:
             html_Conj = "No se encontraron datos de tu cuenta"
             response_statement = Statement(text = html_Conj)
@@ -205,13 +204,21 @@ class MirrorAccountSend(LogicAdapter):
 class TakeMirrorAccounts(LogicAdapter):
     def __init__(self, chatbot, **kwargs):
         super().__init__(chatbot, **kwargs)
+        self.keywords = np.array(['necesito editar una cuenta espejo', 'editar cuenta espejo', 'editar cuenta de espejo', 'edicion cuenta espejo'])
         
     def set_request(self, request):
         self.request = request
         
     def can_process(self, statement):
-        words = ['580']
-        return any(word in statement.text.lower() for word in words)
+        input_text = statement.text.lower()
+        return self._calculate_similarity(input_text) > 0.4
+    
+    def _calculate_similarity(self, input_text):
+        vectorizer = TfidfVectorizer()
+        transform = vectorizer.fit_transform(self.keywords)
+        vectors = vectorizer.transform([input_text])
+        cosine_similarities = cosine_similarity(vectors, transform).flatten()
+        return max(cosine_similarities)
     
     def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):
             
@@ -278,9 +285,13 @@ class TakeMirrorAccounts(LogicAdapter):
                     expire_dt = []
                     for item in get_expire_dt:
                         try:
-                            expire_dt.append(datetime.strptime(item, '%Y-%m-%d') - today)
+                            compared_date = datetime.strptime(item, '%Y-%m-%d') - today
+                            if compared_date.days < 0:
+                                expire_dt.append(0000-00-00)
+                            else:
+                                expire_dt.append(compared_date)
                         except:
-                            expire_dt.append(today)
+                            expire_dt.append(today - timedelta(days=1))
                     #for item in get_expire_dt:
                     #    try:
                     #        expire_dt = [datetime.strptime(item, '%Y-%m-%d') - today]
@@ -296,16 +307,16 @@ class TakeMirrorAccounts(LogicAdapter):
                         <div class="tableContainer">
                             <div id="SearchTable" type="text"></div>
                             <table class="sortable">
-                            <thead id="selected">
+                            <thead id="selected" style="display: table-header-group;">
                                 <tr>
-                                    <th style="width: 10%;">Numero</th>
-                                    <th style="width: 40%;">Nombre</th>
-                                    <th style="width: 20%;">Fecha</th>
-                                    <th style="width: 20%;">Activo</th>
-                                    <th style="width: 10%;"></th>
+                                    <th>Numero</th>
+                                    <th>Nombre</th>
+                                    <th style="display: flow; margin-left:25%;">Expira en</th>
+                                    <th>Activar/Desactivar</th>
+                                    <th></th>
                                 </tr> 
                             </thead>
-                            <tbody id="TableCreateMa">
+                            <tbody id="TableCreateMa" style="display: table-header-group;">
                     """
                     for idx, (name, expire_dt, share_id, su, active_state) in enumerate(zip(get_name, expire_dt, get_share_id, get_su, get_active_state), start=1):
                         checked_attribute = 'checked' if active_state == 'true' else ''
@@ -313,14 +324,14 @@ class TakeMirrorAccounts(LogicAdapter):
                             <tr onclick="displayForm(this)">
                                 <td style="width: 10%;"><p>{idx}</p></td>
                                 <td style="width: 40%;"><p>{name}</p></td>
-                                <td style="width: 20%;"><p>{expire_dt.days}</p></td>
-                                <td>
+                                <td style="width: 20%;"><p>{expire_dt.days if hasattr(expire_dt, 'days') else 'EXPIRO'}</td>
+                                <td style="width: 20%;">
                                     <label class="switch">
                                         <input type="checkbox" value="{share_id}" onclick="ToggleSwitch(this)" {checked_attribute}></input>
                                         <span class="slider"></span>
                                     </label>
                                 </td>
-                                <td><i class="large material-icons">chevron_right</i></td>
+                                <td style="width:10%"><i class="large material-icons">chevron_right</i></td>
                             </tr>
                             <tr class="form-row" style="display:none;">
                                 <td colspan="3">
@@ -329,14 +340,14 @@ class TakeMirrorAccounts(LogicAdapter):
                                         <input type="hidden" name="su" value="{su}">
                                         <input type="hidden" name="share_id" value="{share_id}">
                                         <table class="sortable">
-                                            <thead>
+                                            <thead style="display: table-header-group;">
                                                 <tr>
                                                     <th>Seleccionar</th>
                                                     <th>Nombre</th>
-                                                    <th>IMEI</th>
+                                                    <th style="display: flow-root; margin-left:120%;">IMEI</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody style="display: table-header-group;">
                                             """
                         imei_for_idx = imei_share_id.get(get_share_id[idx-1], [])
                         for name, imei in zip(nameImei, Imei):
@@ -527,7 +538,7 @@ class AyudaBase(LogicAdapter):
         self.button_responses = {'Cuentas Espejo': 'Te mostrare algunas respuestas de cuentas espejo', 'boton 2': 'Ayuda en procesos', 'boton 3': 'Elaboracion de reportes'}
     
     def can_process(self, statement):
-        words = ['ayuda', 'ayudame', 'ayuda con', 'ayuda a']
+        words = ['No']
         return any(word in statement.text.lower() for word in words)
     
     def process(self, input_statement, additional_response_selection_parameters = None, **kwargs):

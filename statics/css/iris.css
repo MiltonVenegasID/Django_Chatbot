@@ -486,10 +486,6 @@ div.msg-box span.btn-group i {
     height: 0;
 }
 
-thead, tbody{
-    display: table-header-group;
-}
-
 .slider {
     position: absolute;
     cursor: pointer;
